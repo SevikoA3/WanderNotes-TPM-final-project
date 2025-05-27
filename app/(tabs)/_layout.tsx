@@ -1,7 +1,7 @@
-import { Tabs, useRouter } from "expo-router";
-import { House, Plus, User as UserIcon } from "phosphor-react-native";
+import { Tabs } from "expo-router";
+import { House, Money, User as UserIcon } from "phosphor-react-native";
 import React from "react";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 
 // Custom TabBarIcon component
 const TabBarIcon = ({
@@ -25,21 +25,7 @@ const TabBarIcon = ({
   );
 };
 
-const CustomTabBarButton = ({ onPress }: { onPress: () => void }) => (
-  <View className="w-full items-center absolute top-[-30px] left-0 z-10">
-    <TouchableOpacity
-      onPress={onPress}
-      className="items-center justify-center w-16 h-16 rounded-full bg-[#FF6347] shadow-lg"
-      style={{ elevation: 8 }}
-    >
-      <Plus size={32} color="#FFFFFF" />
-    </TouchableOpacity>
-  </View>
-);
-
 export default function TabLayout() {
-  const router = useRouter();
-
   return (
     <Tabs
       screenOptions={{
@@ -65,12 +51,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="addNew"
+        name="currency-exchange"
         options={{
-          title: "New", // Or an empty string if you don't want a label
-          tabBarIcon: () => <View />, // Placeholder, actual button is custom
-          tabBarButton: () => (
-            <CustomTabBarButton onPress={() => router.push("/(tabs)/addNew")} />
+          title: "Currency",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon icon={Money} color={color} focused={focused} />
           ),
         }}
       />

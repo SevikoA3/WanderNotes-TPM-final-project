@@ -1,15 +1,19 @@
-import { MagnifyingGlass } from "phosphor-react-native";
+import { useRouter } from "expo-router";
+import { MagnifyingGlass, Plus } from "phosphor-react-native";
 import React from "react";
 import {
   ImageBackground,
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const HomeScreen = () => {
+  const router = useRouter();
+
   const cardData = [
     {
       imageUrl:
@@ -35,7 +39,7 @@ const HomeScreen = () => {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-[#fcfaf8]">
+    <SafeAreaView className="flex-1 bg-[#fcfaf8]" edges={["top"]}>
       <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
         <View className="flex-1 justify-between">
           {/* Top Section */}
@@ -60,7 +64,7 @@ const HomeScreen = () => {
                 </View>
                 <TextInput
                   placeholder="Search"
-                  className="flex-1 h-full text-[#1b130d] placeholder:text-[#9a6b4c] text-base font-normal leading-normal pl-2"
+                  className="flex-1 h-full placeholder:text-[#9a6b4c] text-base font-normal leading-normal pl-2"
                   placeholderTextColor="#9a6b4c"
                 />
               </View>
@@ -69,7 +73,6 @@ const HomeScreen = () => {
             {/* Content Cards */}
             {cardData.map((card, index) => (
               <View key={index} className="p-4">
-                {/* Added bg-white and shadow for card appearance, overflow for image rounding. Adjust xl:w-* for desired layout. */}
                 <View className="flex-col rounded-xl xl:flex-row xl:items-start bg-white shadow-sm overflow-hidden">
                   <ImageBackground
                     source={{ uri: card.imageUrl }}
@@ -92,6 +95,27 @@ const HomeScreen = () => {
           </View>
         </View>
       </ScrollView>
+      {/* Floating Plus Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/components/addNew")}
+        className="absolute bottom-8 right-6"
+        style={{
+          backgroundColor: "#FF6347",
+          borderRadius: 32,
+          width: 64,
+          height: 64,
+          alignItems: "center",
+          justifyContent: "center",
+          elevation: 8,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        }}
+        activeOpacity={0.85}
+      >
+        <Plus size={32} color="#FFFFFF" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

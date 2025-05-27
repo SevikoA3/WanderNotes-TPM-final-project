@@ -1,9 +1,9 @@
 import { useRouter } from "expo-router";
 import { ArrowLeft, Gear, Megaphone, X } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ImageBackground,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -19,7 +19,7 @@ const ProfileScreen = () => {
   const router = useRouter();
 
   const handleNavigateToSettings = () => {
-    router.push("/settings"); // Navigate to settings screen
+    router.push("/components/settings"); // Navigate to settings screen
   };
 
   const handleLogout = () => {
@@ -45,7 +45,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#fcfaf8]">
+    <SafeAreaView className="flex-1 bg-[#fcfaf8]" edges={["top"]}>
       <View className="flex-1 justify-between">
         {/* Main Content ScrollView */}
         <ScrollView>

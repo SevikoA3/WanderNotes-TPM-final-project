@@ -1,12 +1,5 @@
 import { useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  Bell,
-  Envelope,
-  Fingerprint,
-  Key,
-  Trash,
-} from "phosphor-react-native";
+import { Bell, Envelope, Fingerprint, Key, Trash } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   ImageBackground,
@@ -38,19 +31,6 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-[#fcfaf8]">
       <ScrollView className="flex-1">
-        {/* Header */}
-        <View className="flex-row items-center bg-[#fcfaf8] p-4 pb-2 justify-between">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="flex size-12 shrink-0 items-center justify-center text-[#1b130d]"
-          >
-            <ArrowLeft size={24} color="#1b130d" />
-          </TouchableOpacity>
-          <Text className="text-[#1b130d] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">
-            Settings
-          </Text>
-        </View>
-
         {/* Account Section */}
         <Text className="text-[#1b130d] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
           Account

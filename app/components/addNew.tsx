@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Bell, Calendar, Image as IconImage, X } from "phosphor-react-native";
+import { Bell, Calendar, Image as IconImage } from "phosphor-react-native";
 import React from "react";
 import {
   ScrollView,
@@ -16,19 +16,6 @@ export default function AddNewScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#fdf9f6]">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Header */}
-        <View className="flex-row items-center p-4 pb-2 justify-between">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="size-12 items-center justify-center"
-          >
-            <X size={28} color="#191410" />
-          </TouchableOpacity>
-          <Text className="flex-1 text-center pr-12 text-[#191410] text-2xl font-bold leading-tight tracking-[-0.015em]">
-            New Adventure
-          </Text>
-        </View>
-
         {/* Title Input */}
         <View className="px-4 pt-2">
           <TextInput
