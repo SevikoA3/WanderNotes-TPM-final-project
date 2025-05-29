@@ -7,7 +7,7 @@ export default function componentsLayout() {
         screenOptions={{
           headerShown: false, // Hide header for all screens in this stack
           contentStyle: {
-            backgroundColor: "#fdf9f6", // Set background color for the stack
+            backgroundColor: "#fcfaf8", // Use Tailwind config color
           },
         }}
       >
@@ -17,10 +17,10 @@ export default function componentsLayout() {
             title: "New Adventure", // Title for the addNew screen
             headerShown: true, // Show header for this screen
             headerStyle: {
-              backgroundColor: "#fdf9f6", // Header background color
+              backgroundColor: "#fcfaf8", // Use Tailwind config color
             },
             headerTitleStyle: {
-              color: "#191410", // Header title color
+              color: "#1b130d", // Use Tailwind config color
               fontSize: 24, // Header title font size
               fontWeight: "bold", // Header title font weight
             },
@@ -33,10 +33,10 @@ export default function componentsLayout() {
             title: "Settings", // Title for the settings screen
             headerShown: true, // Show header for this screen
             headerStyle: {
-              backgroundColor: "#fdf9f6", // Header background color
+              backgroundColor: "#fcfaf8", // Use Tailwind config color
             },
             headerTitleStyle: {
-              color: "#191410", // Header title color
+              color: "#1b130d", // Use Tailwind config color
               fontSize: 24, // Header title font size
               fontWeight: "bold", // Header title font weight
             },

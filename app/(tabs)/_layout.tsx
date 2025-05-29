@@ -30,11 +30,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false, // Hide header for all tabs
-        tabBarActiveTintColor: "#1b130d", // Color for active tab icon and label
-        tabBarInactiveTintColor: "#9a6b4c", // Color for inactive tab icon and label
+        tabBarActiveTintColor: "#1b130d", // Use Tailwind config color
+        tabBarInactiveTintColor: "#9a6b4c", // Use Tailwind config color
         tabBarStyle: {
-          backgroundColor: "#fcfaf8", // Background color of the tab bar
-          borderTopColor: "#f3ece7", // Top border color of the tab bar
+          backgroundColor: "#fcfaf8", // Use Tailwind config color
+          borderTopColor: "#f3ece7", // Use Tailwind config color
           height: 70, // Increased height to accommodate the custom button
           paddingBottom: 10, // Add padding for labels
         },

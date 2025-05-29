@@ -57,10 +57,10 @@ const EditNote = () => {
     if (id) fetchNote();
   }, [id]);
 
-  // Fungsi untuk memilih dan update gambar
+  // Function to pick and update image
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [16, 9],
       quality: 1,
@@ -129,7 +129,7 @@ const EditNote = () => {
   if (!note) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-lg text-[#1b130d]">Note not found.</Text>
+        <Text className="text-lg text-primary">Note not found.</Text>
       </View>
     );
   }
@@ -172,7 +172,7 @@ const EditNote = () => {
               </ImageBackground>
             </View>
           </TouchableOpacity>
-          <Text className="text-[#1b130d] text-lg font-bold mb-2">Title</Text>
+          <Text className="text-primary text-lg font-bold mb-2">Title</Text>
           <TextInput
             value={title}
             onChangeText={setTitle}
@@ -180,7 +180,7 @@ const EditNote = () => {
             style={{ minHeight: 56 }}
             editable={!saving && !deleting}
           />
-          <Text className="text-[#1b130d] text-lg font-bold mb-2">
+          <Text className="text-primary text-lg font-bold mb-2">
             Description
           </Text>
           <TextInput

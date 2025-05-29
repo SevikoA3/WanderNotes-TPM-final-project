@@ -135,23 +135,23 @@ export default function AddNewScreen() {
           />
         </View>
         {/* Add to your note */}
-        <Text className="px-4 pt-4 pb-2 text-lg font-bold text-[#191410]">
+        <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">
           Add to your note
         </Text>
         <View className="gap-4 px-4">
           {/* Add dates */}
           <TouchableOpacity className="flex-row items-center mb-2">
             <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-              <Calendar size={28} color="#191410" weight="regular" />
+              <Calendar size={28} color="#1b130d" weight="regular" />
             </View>
-            <Text className="text-base text-[#191410]">Add dates</Text>
+            <Text className="text-base text-primary">Add dates</Text>
           </TouchableOpacity>
           {/* Add reminder */}
           <TouchableOpacity className="flex-row items-center mb-2">
             <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-              <Bell size={28} color="#191410" weight="regular" />
+              <Bell size={28} color="#1b130d" weight="regular" />
             </View>
-            <Text className="text-base text-[#191410]">Add reminder</Text>
+            <Text className="text-base text-primary">Add reminder</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -53,7 +53,7 @@ const ProfileScreen = () => {
           <View className="flex-row items-center bg-background p-4 pb-2 justify-between">
             <TouchableOpacity
               onPress={handleClose}
-              className="flex size-12 shrink-0 items-center justify-center text-[#1b130d]"
+              className="flex size-12 shrink-0 items-center justify-center text-primary"
             >
               <X size={24} color="#1b130d" />
             </TouchableOpacity>

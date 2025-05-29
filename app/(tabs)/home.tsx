@@ -26,7 +26,7 @@ const HomeScreen = () => {
   const router = useRouter();
   const [noteList, setNoteList] = useState<Note[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true); // <-- add loading state
+  const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -58,36 +58,39 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView
+        className="flex-1"
+        stickyHeaderIndices={[0]}
+      >
+        {/* Header */}
+        <View className="bg-background">
+          <View className="flex-row items-center p-4 pb-2 justify-between">
+            {/* Spacer for centering title */}
+            <View className="w-12" />
+            <Text className="text-primary text-2xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
+              WanderNotes
+            </Text>
+            <View className="flex w-12 items-center justify-end" />
+          </View>
+          {/* Search Bar */}
+          <View className="px-4 py-3">
+            <View className="flex-row items-center rounded-xl h-12 w-full bg-surface overflow-hidden">
+              <View className="items-center justify-center pl-4 pr-2">
+                <MagnifyingGlass size={24} color="#9a6b4c" />
+              </View>
+              <TextInput
+                placeholder="Search"
+                className="flex-1 h-full placeholder:text-accent text-base font-normal leading-normal pl-2"
+                placeholderTextColor="#9a6b4c"
+                value={search}
+                onChangeText={setSearch}
+              />
+            </View>
+          </View>
+        </View>
         <View className="flex-1 justify-between">
           {/* Top Section */}
           <View>
-            {/* Header */}
-            <View className="flex-row items-center bg-background p-4 pb-2 justify-between">
-              {/* Spacer for centering title */}
-              <View className="w-12" />
-              <Text className="text-primary text-2xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
-                WanderNotes
-              </Text>
-              <View className="flex w-12 items-center justify-end" />
-            </View>
-
-            {/* Search Bar */}
-            <View className="px-4 py-3">
-              <View className="flex-row items-center rounded-xl h-12 w-full bg-surface overflow-hidden">
-                <View className="items-center justify-center pl-4 pr-2">
-                  <MagnifyingGlass size={24} color="#9a6b4c" />
-                </View>
-                <TextInput
-                  placeholder="Search"
-                  className="flex-1 h-full placeholder:text-accent text-base font-normal leading-normal pl-2"
-                  placeholderTextColor="#9a6b4c"
-                  value={search}
-                  onChangeText={setSearch}
-                />
-              </View>
-            </View>
-
             {/* Content Cards */}
             {loading ? (
               <View className="flex-1 items-center justify-center py-12">
@@ -134,20 +137,7 @@ const HomeScreen = () => {
       {/* Floating Plus Button */}
       <TouchableOpacity
         onPress={() => router.push("/components/addNew")}
-        className="absolute bottom-8 right-6"
-        style={{
-          backgroundColor: "#FF6347",
-          borderRadius: 32,
-          width: 64,
-          height: 64,
-          alignItems: "center",
-          justifyContent: "center",
-          elevation: 8,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-        }}
+        className="absolute bottom-8 right-6 bg-orange rounded-full w-16 h-16 items-center justify-center shadow-lg"
         activeOpacity={0.85}
       >
         <Plus size={32} color="#FFFFFF" />
