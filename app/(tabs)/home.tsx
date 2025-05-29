@@ -4,7 +4,6 @@ import { MagnifyingGlass, Plus } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  ImageBackground,
   ScrollView,
   Text,
   TextInput,
@@ -12,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import NoteCard from "../components/NoteCard";
 import db from "../db/db";
 import { notes } from "../db/schema";
 
@@ -95,37 +95,16 @@ const HomeScreen = () => {
               </View>
             ) : (
               filteredNotes.map((note, index) => (
-                <TouchableOpacity
+                <NoteCard
                   key={note.id || index}
+                  note={note}
                   onPress={() =>
                     router.push({
                       pathname: "/pages/editNote",
                       params: { id: note.id },
                     })
                   }
-                  activeOpacity={0.85}
-                  className="p-4"
-                >
-                  <View className="flex-col rounded-xl xl:flex-row xl:items-start bg-white shadow-sm overflow-hidden">
-                    <ImageBackground
-                      source={{ uri: note.imagePath }}
-                      className="w-full aspect-[16/9] xl:w-1/3"
-                      resizeMode="cover"
-                    />
-                    <View className="w-full xl:w-2/3 grow flex-col items-stretch justify-center gap-1 p-4">
-                      <Text className="text-primary text-lg font-bold leading-tight tracking-[-0.015em]">
-                        {note.title}
-                      </Text>
-                      <View className="flex-row items-end gap-3 justify-between mt-1">
-                        <Text className="text-accent text-base font-normal leading-normal">
-                          {note.description.length > 80
-                            ? note.description.slice(0, 80) + "..."
-                            : note.description}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                />
               ))
             )}
           </View>
