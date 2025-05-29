@@ -38,16 +38,16 @@ export default function CurrencyExchangeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#fcfaf8] px-4 justify-center">
+    <SafeAreaView className="flex-1 bg-background px-4 justify-center">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View className="flex-1 justify-center">
           <Text className="text-[#1b130d] text-2xl font-bold text-center mb-6">
             Currency Exchange
           </Text>
-          <View className="bg-[#f3ece7] rounded-xl p-6 shadow-sm">
-            <Text className="text-[#9a6b4c] mb-2">Masukkan jumlah (IDR):</Text>
+          <View className="bg-surface rounded-xl p-6 shadow-sm">
+            <Text className="text-accent mb-2">Masukkan jumlah (IDR):</Text>
             <TextInput
-              className="bg-white rounded-lg px-4 py-3 text-[#1b130d] text-lg mb-2"
+              className="bg-white rounded-lg px-4 py-3 text-primary text-lg mb-2"
               keyboardType="numeric"
               value={amount}
               onChangeText={setAmount}
@@ -57,7 +57,7 @@ export default function CurrencyExchangeScreen() {
             />
             {error ? <Text className="text-red-500 mb-2">{error}</Text> : null}
             <TouchableOpacity
-              className="flex-row items-center justify-center bg-[#1b130d] rounded-lg py-3 mt-2"
+              className="flex-row items-center justify-center bg-primary rounded-lg py-3 mt-2"
               onPress={handleExchange}
               activeOpacity={0.85}
             >
@@ -67,7 +67,7 @@ export default function CurrencyExchangeScreen() {
               </Text>
             </TouchableOpacity>
             {result && (
-              <Text className="text-[#1b130d] text-lg font-semibold text-center mt-4">
+              <Text className="text-primary text-lg font-semibold text-center mt-4">
                 {result}
               </Text>
             )}

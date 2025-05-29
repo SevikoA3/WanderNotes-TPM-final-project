@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { ArrowLeft, Gear, Megaphone, X } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
 import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ImageBackground,
   ScrollView,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Notes for usage:
 // 1. Icons: Uses phosphor-react-native. Ensure it's installed.
@@ -45,19 +45,19 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#fcfaf8]" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="flex-1 justify-between">
         {/* Main Content ScrollView */}
         <ScrollView>
           {/* Header */}
-          <View className="flex-row items-center bg-[#fcfaf8] p-4 pb-2 justify-between">
+          <View className="flex-row items-center bg-background p-4 pb-2 justify-between">
             <TouchableOpacity
               onPress={handleClose}
               className="flex size-12 shrink-0 items-center justify-center text-[#1b130d]"
             >
               <X size={24} color="#1b130d" />
             </TouchableOpacity>
-            <Text className="text-[#1b130d] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">
+            <Text className="text-primary text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">
               Profile
             </Text>
           </View>
@@ -74,13 +74,13 @@ const ProfileScreen = () => {
                   imageStyle={{ borderRadius: 9999 }}
                 />
                 <View className="flex flex-col items-center justify-center">
-                  <Text className="text-[#1b130d] text-[22px] font-bold leading-tight tracking-[-0.015em] text-center">
+                  <Text className="text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] text-center">
                     Sophia Carter
                   </Text>
-                  <Text className="text-[#9a6b4c] text-base font-normal leading-normal text-center">
+                  <Text className="text-accent text-base font-normal leading-normal text-center">
                     Travel Enthusiast
                   </Text>
-                  <Text className="text-[#9a6b4c] text-base font-normal leading-normal text-center">
+                  <Text className="text-accent text-base font-normal leading-normal text-center">
                     Joined 2021
                   </Text>
                 </View>
@@ -90,34 +90,34 @@ const ProfileScreen = () => {
 
           {/* Action List */}
           <TouchableOpacity onPress={handleNavigateToSettings}>
-            <View className="flex-row items-center gap-4 bg-[#fcfaf8] px-4 min-h-14">
-              <View className="text-[#1b130d] flex items-center justify-center rounded-lg bg-[#f3ece7] shrink-0 size-10">
+            <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+              <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Gear size={24} color="#1b130d" />
               </View>
-              <Text className="text-[#1b130d] text-base font-normal leading-normal flex-1 truncate">
+              <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
                 Settings
               </Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleFeedback}>
-            <View className="flex-row items-center gap-4 bg-[#fcfaf8] px-4 min-h-14">
-              <View className="text-[#1b130d] flex items-center justify-center rounded-lg bg-[#f3ece7] shrink-0 size-10">
+            <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+              <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Megaphone size={24} color="#1b130d" />
               </View>
-              <Text className="text-[#1b130d] text-base font-normal leading-normal flex-1 truncate">
+              <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
                 Feedback
               </Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleLogout}>
-            <View className="flex-row items-center gap-4 bg-[#fcfaf8] px-4 min-h-14">
-              <View className="text-[#1b130d] flex items-center justify-center rounded-lg bg-[#f3ece7] shrink-0 size-10">
+            <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+              <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 {/* Using SignOut icon might be more conventional for logout */}
                 <ArrowLeft size={24} color="#1b130d" />
               </View>
-              <Text className="text-[#1b130d] text-base font-normal leading-normal flex-1 truncate">
+              <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
                 Logout
               </Text>
             </View>
@@ -125,7 +125,7 @@ const ProfileScreen = () => {
         </ScrollView>
 
         {/* Spacer for bottom safe area, if not using a tab bar that handles it */}
-        {/* <View className="h-5 bg-[#fcfaf8]" /> */}
+        {/* <View className="h-5 bg-background" /> */}
       </View>
     </SafeAreaView>
   );

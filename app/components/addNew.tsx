@@ -1,5 +1,6 @@
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Bell, Calendar, Image as IconImage } from "phosphor-react-native";
 import React, { useState } from "react";
@@ -68,14 +69,54 @@ export default function AddNewScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#fdf9f6]">
+    <SafeAreaView className="flex-1 bg-background-light">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/* Image Upload Area */}
+        <TouchableOpacity
+          className="w-full aspect-[16/9] mb-4 px-4 rounded-xl overflow-hidden"
+          activeOpacity={0.8}
+          onPress={pickImage}
+        >
+          {image ? (
+            <View className="flex-1 w-full h-full">
+              <Image
+                source={{ uri: image }}
+                className="w-full h-full absolute rounded-xl"
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  borderRadius: 16,
+                }}
+              >
+                <View className="flex-1 justify-center items-center rounded-xl">
+                  <Text className="text-white text-lg font-bold">
+                    Click to edit
+                  </Text>
+                </View>
+              </LinearGradient>
+            </View>
+          ) : (
+            <View className="flex-1 w-full h-full bg-surface-light rounded-xl items-center justify-center border-2 border-dashed border-accent-light">
+              <IconImage size={48} color="#a97c5a" weight="regular" />
+              <Text className="text-accent-light mt-2 font-medium text-base">
+                Click to add a picture
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
         {/* Title Input */}
         <View className="px-4 pt-2">
           <TextInput
             placeholder="Trip title"
             placeholderTextColor="#a97c5a"
-            className="w-full rounded-2xl bg-[#f5ede7] text-[#a97c5a] text-lg font-medium p-4 mb-4"
+            className="w-full rounded-2xl bg-surface-light text-accent-light text-lg font-medium p-4 mb-4"
             style={{ minHeight: 56 }}
             value={title}
             onChangeText={setTitle}
@@ -86,7 +127,7 @@ export default function AddNewScreen() {
           <TextInput
             placeholder="Write your note here..."
             placeholderTextColor="#a97c5a"
-            className="w-full rounded-2xl bg-[#f5ede7] text-[#a97c5a] text-base font-normal p-4 mb-4"
+            className="w-full rounded-2xl bg-surface-light text-accent-light text-base font-normal p-4 mb-4"
             style={{ minHeight: 120, textAlignVertical: "top" }}
             multiline
             value={description}
@@ -98,40 +139,16 @@ export default function AddNewScreen() {
           Add to your note
         </Text>
         <View className="gap-4 px-4">
-          {/* Add images */}
-          <TouchableOpacity
-            className="flex-row items-center mb-2"
-            onPress={pickImage}
-          >
-            <View className="size-12 rounded-xl bg-[#f5ede7] items-center justify-center mr-4">
-              <IconImage size={28} color="#191410" weight="regular" />
-            </View>
-            <Text className="text-base text-[#191410]">
-              {image ? "Image Selected" : "Add images or attachments"}
-            </Text>
-          </TouchableOpacity>
-          {image && (
-            <View className="mb-2 items-center">
-              <Image
-                source={{ uri: image }}
-                style={{
-                  width: 120,
-                  height: 80,
-                  borderRadius: 12,
-                }}
-              />
-            </View>
-          )}
           {/* Add dates */}
           <TouchableOpacity className="flex-row items-center mb-2">
-            <View className="size-12 rounded-xl bg-[#f5ede7] items-center justify-center mr-4">
+            <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
               <Calendar size={28} color="#191410" weight="regular" />
             </View>
             <Text className="text-base text-[#191410]">Add dates</Text>
           </TouchableOpacity>
           {/* Add reminder */}
           <TouchableOpacity className="flex-row items-center mb-2">
-            <View className="size-12 rounded-xl bg-[#f5ede7] items-center justify-center mr-4">
+            <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
               <Bell size={28} color="#191410" weight="regular" />
             </View>
             <Text className="text-base text-[#191410]">Add reminder</Text>
@@ -141,7 +158,7 @@ export default function AddNewScreen() {
       {/* Save Button */}
       <View className="px-4 pb-6 pt-2 bg-transparent">
         <TouchableOpacity
-          className="w-full h-14 rounded-2xl bg-[#f4811f] items-center justify-center"
+          className="w-full h-14 rounded-2xl bg-orange-dark items-center justify-center"
           onPress={handleSave}
           disabled={saving}
         >
