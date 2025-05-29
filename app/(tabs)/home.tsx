@@ -58,10 +58,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <ScrollView
-        className="flex-1"
-        stickyHeaderIndices={[0]}
-      >
+      <ScrollView className="flex-1" stickyHeaderIndices={[0]}>
         {/* Header */}
         <View className="bg-background">
           <View className="flex-row items-center p-4 pb-2 justify-between">
@@ -102,7 +99,7 @@ const HomeScreen = () => {
                   key={note.id || index}
                   onPress={() =>
                     router.push({
-                      pathname: "/components/editNote",
+                      pathname: "/pages/editNote",
                       params: { id: note.id },
                     })
                   }
@@ -136,7 +133,7 @@ const HomeScreen = () => {
       </ScrollView>
       {/* Floating Plus Button */}
       <TouchableOpacity
-        onPress={() => router.push("/components/addNew")}
+        onPress={() => router.push("/pages/addNew")}
         className="absolute bottom-8 right-6 bg-orange rounded-full w-16 h-16 items-center justify-center shadow-lg"
         activeOpacity={0.85}
       >

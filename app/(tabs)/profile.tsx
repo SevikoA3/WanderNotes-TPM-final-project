@@ -19,7 +19,7 @@ const ProfileScreen = () => {
   const router = useRouter();
 
   const handleNavigateToSettings = () => {
-    router.push("/components/settings"); // Navigate to settings screen
+    router.push("/pages/settings"); // Navigate to settings screen
   };
 
   const handleLogout = () => {
