@@ -11,7 +11,7 @@ export type NoteCardProps = {
   onPress: () => void;
 };
 
-const NoteCard: React.FC<NoteCardProps> = ({ note, onPress }) => (
+const NoteCard = ({ note, onPress }: NoteCardProps) => (
   <TouchableOpacity
     key={note.id}
     onPress={onPress}
