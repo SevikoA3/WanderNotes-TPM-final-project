@@ -146,12 +146,11 @@ export default function CurrencyExchangeScreen() {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    width: "100%",
-                    height: "100%",
+                    flex: 1,
                   }}
                   itemStyle={{ color: "#1b130d", fontWeight: "bold" }}
                   dropdownIconColor="#fff"
-                  mode="dropdown"
+                  mode="dialog"
                 >
                   {COUNTRY_CODES.map((code) => (
                     <Picker.Item key={code} label={code} value={code} />
@@ -176,12 +175,11 @@ export default function CurrencyExchangeScreen() {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    width: "100%",
-                    height: "100%",
+                    flex: 1,
                   }}
                   itemStyle={{ color: "#1b130d", fontWeight: "bold" }}
                   dropdownIconColor="#fff"
-                  mode="dropdown"
+                  mode="dialog"
                 >
                   {COUNTRY_CODES.map((code) => (
                     <Picker.Item key={code} label={code} value={code} />
