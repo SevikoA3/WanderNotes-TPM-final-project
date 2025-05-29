@@ -97,7 +97,7 @@ export default function AddNewScreen() {
               >
                 <View className="flex-1 justify-center items-center rounded-xl">
                   <Text className="text-white text-lg font-bold">
-                    Click to edit
+                    Press to edit
                   </Text>
                 </View>
               </LinearGradient>
@@ -106,7 +106,7 @@ export default function AddNewScreen() {
             <View className="flex-1 w-full h-full bg-surface-light rounded-xl items-center justify-center border-2 border-dashed border-accent-light">
               <IconImage size={48} color="#a97c5a" weight="regular" />
               <Text className="text-accent-light mt-2 font-medium text-base">
-                Click to add a picture
+                Press to add a picture
               </Text>
             </View>
           )}

@@ -165,7 +165,7 @@ const EditNote = () => {
                 >
                   <View className="flex-1 justify-center items-center rounded-xl">
                     <Text className="text-white text-lg font-bold">
-                      Click to edit
+                      Press to edit
                     </Text>
                   </View>
                 </LinearGradient>
