@@ -1,4 +1,5 @@
-import { GoogleMaps, useLocationPermissions } from "expo-maps";
+import * as Location from "expo-location";
+import { GoogleMaps } from "expo-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Platform, Text, TouchableOpacity, View } from "react-native";
@@ -11,6 +12,7 @@ interface LatLng {
 }
 
 export default function SelectLocationScreen() {
+  console.log("SelectLocationScreen mounted");
   const router = useRouter();
   const params = useLocalSearchParams();
   const initialLat = params.latitude ? Number(params.latitude) : -6.2;
@@ -19,14 +21,16 @@ export default function SelectLocationScreen() {
     latitude: initialLat,
     longitude: initialLng,
   });
-  const [permission, requestPermission] = useLocationPermissions();
+  const [permissionGranted, setPermissionGranted] = useState(false);
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!permission || permission.status !== "granted") {
-      requestPermission();
-    }
-  }, [permission]);
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("expo-location permission status:", status);
+      setPermissionGranted(status === "granted");
+    })();
+  }, []);
 
   const handleMapClick = (event: { coordinates: { latitude?: number; longitude?: number } }) => {
     setLocation({
@@ -71,29 +75,35 @@ export default function SelectLocationScreen() {
     <SafeAreaView className="flex-1 bg-background-light">
       <View className="flex-1">
         {Platform.OS === "android" ? (
-          <GoogleMaps.View
-            ref={mapRef}
-            style={{ flex: 1 }}
-            cameraPosition={{ coordinates: location, zoom: 15 }}
-            markers={[
-              {
-                coordinates: location,
-                draggable: true,
-                id: "selected-location",
-                title: "Selected Location",
-              },
-            ]}
-            onMapClick={handleMapClick as any}
-            onMarkerClick={handleMarkerDragEnd}
-            onCameraMove={(e: any) =>
-              setLocation({
-                latitude: e.coordinates.latitude ?? 0,
-                longitude: e.coordinates.longitude ?? 0,
-              })
-            }
-            uiSettings={{ myLocationButtonEnabled: true, compassEnabled: true }}
-            properties={{ isMyLocationEnabled: true, selectionEnabled: true }}
-          />
+          permissionGranted ? (
+            <GoogleMaps.View
+              ref={mapRef}
+              style={{ flex: 1 }}
+              cameraPosition={{ coordinates: location, zoom: 15 }}
+              markers={[
+                {
+                  coordinates: location,
+                  draggable: true,
+                  id: "selected-location",
+                  title: "Selected Location",
+                },
+              ]}
+              onMapClick={handleMapClick as any}
+              onMarkerClick={handleMarkerDragEnd}
+              onCameraMove={(e: any) =>
+                setLocation({
+                  latitude: e.coordinates.latitude ?? 0,
+                  longitude: e.coordinates.longitude ?? 0,
+                })
+              }
+              uiSettings={{ myLocationButtonEnabled: true, compassEnabled: true }}
+              properties={{ isMyLocationEnabled: true, selectionEnabled: true }}
+            />
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Text>Waiting for location permission...</Text>
+            </View>
+          )
         ) : (
           <View className="flex-1 items-center justify-center">
             <Text>Maps are only available on Android</Text>

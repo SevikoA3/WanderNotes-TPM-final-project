@@ -17,7 +17,7 @@ export default {
       keystore: {
         keystorePath: "android/release.keystore",
         keystorePassword: "12345678",
-        keyAlias: "wandernotes",
+        keyAlias: "wondernotes",
         keyPassword: "12345678",
       },
       config: {
