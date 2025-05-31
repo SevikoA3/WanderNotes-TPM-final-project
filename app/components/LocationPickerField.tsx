@@ -14,7 +14,7 @@ const LocationPickerField: React.FC<LocationPickerFieldProps> = ({
   onPick,
   disabled,
 }) => (
-  <View className="px-4 pb-2">
+  <View className="pb-2">
     <Text className="text-base text-primary font-bold mb-1">Location</Text>
     <TouchableOpacity
       onPress={onPick}

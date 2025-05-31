@@ -5,7 +5,6 @@ import {
   useNavigation,
   useRouter,
 } from "expo-router";
-import { Calendar } from "phosphor-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -107,22 +106,26 @@ const ViewNoteScreen = () => {
               />
             </View>
           ) : null}
-          {/* Lokasi di bawah gambar */}
+          {/* Created date above address, no calendar icon, with time */}
+          <Text className="text-base text-accent mx-4 mb-2">
+            {createdAt
+              ? new Date(createdAt).toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+              : "-"}
+          </Text>
+          {/* Lokasi di bawah tanggal */}
           {note.address ? (
             <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text>
           ) : null}
-          <Text className="text-accent text-base leading-relaxed m-4">
+          <Text className="text-primary text-base leading-relaxed m-4">
             {note.description}
           </Text>
-          {/* Tanggal dibuat dan reminders */}
-          <View className="flex-row items-center mb-2 mx-4">
-            <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-              <Calendar size={28} color="#1b130d" weight="regular" />
-            </View>
-            <Text className="text-base text-primary">
-              {createdAt ? new Date(createdAt).toLocaleString() : "-"}
-            </Text>
-          </View>
           {/* List reminders */}
           <ReminderList
             reminders={remindersState}

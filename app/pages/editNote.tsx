@@ -428,16 +428,6 @@ const EditNote = () => {
                 onPick={handlePickLocation}
                 disabled={saving || deleting}
               />
-              {/* Add dates */}
-              <View className="flex-row items-center mb-2">
-                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-                  <Calendar size={28} color="#1b130d" weight="regular" />
-                </View>
-                <Text className="text-base text-primary">
-                  {createdAt ? new Date(createdAt).toLocaleString() : "-"}
-                </Text>
-              </View>
-              {/* Add reminder */}
               <TouchableOpacity
                 className="flex-row items-center mb-2"
                 onPress={handleAddReminder}
@@ -452,6 +442,21 @@ const EditNote = () => {
                 reminders={remindersState}
                 onRemove={handleRemoveReminder}
               />
+              {/* Add created date below reminders */}
+              <View className="flex-row items-center mb-2 mt-2">
+                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+                  <Calendar size={28} color="#1b130d" weight="regular" />
+                </View>
+                <Text className="text-base text-primary">
+                  {createdAt
+                    ? new Date(createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </Text>
+              </View>
               <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode="datetime"

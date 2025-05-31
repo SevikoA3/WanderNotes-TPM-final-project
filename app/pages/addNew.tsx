@@ -294,28 +294,19 @@ export default function AddNewScreen() {
                 value={description}
                 onChangeText={setDescription}
               />
+              {/* Lokasi */}
+              <LocationPickerField
+                address={address}
+                loading={locLoading}
+                onPick={handlePickLocation}
+                disabled={locLoading}
+              />
             </View>
-            {/* Lokasi */}
-            <LocationPickerField
-              address={address}
-              loading={locLoading}
-              onPick={handlePickLocation}
-              disabled={locLoading}
-            />
             {/* Add to your note */}
             <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">
               Add to your note
             </Text>
             <View className="gap-4 px-4">
-              {/* Add dates */}
-              <View className="flex-row items-center mb-2">
-                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-                  <Calendar size={28} color="#1b130d" weight="regular" />
-                </View>
-                <Text className="text-base text-primary">
-                  {new Date().toLocaleString()}
-                </Text>
-              </View>
               {/* Add reminder */}
               <TouchableOpacity
                 className="flex-row items-center mb-2"
@@ -331,6 +322,19 @@ export default function AddNewScreen() {
                 reminders={remindersState}
                 onRemove={handleRemoveReminder}
               />
+              {/* Add created date below reminders */}
+              <View className="flex-row items-center mb-2 mt-2">
+                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+                  <Calendar size={28} color="#1b130d" weight="regular" />
+                </View>
+                <Text className="text-base text-primary">
+                  {new Date().toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </Text>
+              </View>
               {/* DateTimePicker */}
               <DateTimePickerModal
                 isVisible={isDatePickerVisible}
