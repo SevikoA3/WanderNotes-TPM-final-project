@@ -1,0 +1,1 @@
+ALTER TABLE `notes` ADD `created_at` text NOT NULL;

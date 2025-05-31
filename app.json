@@ -12,14 +12,10 @@
       "supportsTablet": true
     },
     "android": {
-      "keystore": {
-        "keystorePath": "android/release.keystore",
-        "keystorePassword": "12345678",
-        "keyAlias": "wandernotes",
-        "keyPassword": "12345678"
-      },
       "config": {
-        "googleMaps": {}
+        "googleMaps": {
+          "apiKey": "process.env.GOOGLE_MAPS_API_KEY"
+        }
       },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/myIcon.png",
@@ -27,8 +23,6 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
@@ -68,6 +62,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6d48aedb-71f6-4d04-ab5e-482344e00620"
+      }
     }
   }
 }

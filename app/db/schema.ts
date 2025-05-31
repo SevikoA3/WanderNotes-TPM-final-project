@@ -9,6 +9,11 @@ export const notes = sqliteTable("notes", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   address: text("address"),
+  createdAt: text("created_at").notNull(),
+  tripStartDate: text("trip_start_date"),
+  tripEndDate: text("trip_end_date"),
+  reminderAt: text("reminder_at"), 
+  isReminderSet: integer("is_reminder_set", { mode: "boolean" }).default(false), 
 });
 
 export default {};

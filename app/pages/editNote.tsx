@@ -1,6 +1,7 @@
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -25,6 +26,8 @@ const EditNote = () => {
     imagePath: string;
     title: string;
     description: string;
+    latitude?: number | null;
+    longitude?: number | null;
   } | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -32,6 +35,9 @@ const EditNote = () => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [image, setImage] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [address, setAddress] = useState<string>("");
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -46,7 +52,10 @@ const EditNote = () => {
           setNote(result);
           setTitle(result.title);
           setDescription(result.description);
-          setImage(result.imagePath); // set image state
+          setImage(result.imagePath);
+          setLatitude(result.latitude ?? null);
+          setLongitude(result.longitude ?? null);
+          setAddress(result.address ?? "");
         }
       } catch (err) {
         Alert.alert("Error", "Failed to load note.");
@@ -56,6 +65,129 @@ const EditNote = () => {
     };
     if (id) fetchNote();
   }, [id]);
+
+  // Reverse geocode if address is missing but lat/lng exist
+  useEffect(() => {
+    const getAddress = async () => {
+      if ((!address || address === "") && latitude && longitude) {
+        try {
+          const res = await Location.reverseGeocodeAsync({
+            latitude,
+            longitude,
+          });
+          if (res && res.length > 0) {
+            const a = res[0];
+            setAddress(
+              [a.name, a.street, a.city, a.region, a.country]
+                .filter(Boolean)
+                .join(", ")
+            );
+          }
+        } catch {}
+      }
+    };
+    getAddress();
+  }, [latitude, longitude]);
+
+  // Handle location returned from selectLocation
+  const params = useLocalSearchParams();
+  useEffect(() => {
+    if (params.selectedLatitude && params.selectedLongitude) {
+      const lat = Number(params.selectedLatitude);
+      const lng = Number(params.selectedLongitude);
+      setLatitude(lat);
+      setLongitude(lng);
+      // Get address for new lat/lng
+      (async () => {
+        try {
+          const res = await Location.reverseGeocodeAsync({
+            latitude: lat,
+            longitude: lng,
+          });
+          if (res && res.length > 0) {
+            const a = res[0];
+            setAddress(
+              [a.name, a.street, a.city, a.region, a.country]
+                .filter(Boolean)
+                .join(", ")
+            );
+          } else {
+            setAddress("");
+          }
+        } catch {
+          setAddress("");
+        }
+      })();
+    } else if (id && !note) {
+      // Only fetch note if not already loaded and no new location is passed
+      // Initial fetch of note data, which includes its saved location
+      // This part remains the same, as it's for loading existing note data
+      const fetchNote = async () => {
+        setLoading(true);
+        try {
+          const result = await db
+            .select()
+            .from(notes)
+            .where(eq(notes.id, Number(id)))
+            .get();
+          if (result) {
+            setNote(result);
+            setTitle(result.title);
+            setDescription(result.description);
+            setImage(result.imagePath);
+            // Set lat/lng from fetched note only if not overridden by params
+            if (!params.selectedLatitude && !params.selectedLongitude) {
+              setLatitude(result.latitude ?? null);
+              setLongitude(result.longitude ?? null);
+              setAddress(result.address ?? "");
+            }
+          }
+        } catch (err) {
+          Alert.alert("Error", "Failed to load note.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchNote();
+    }
+  }, [id, params.selectedLatitude, params.selectedLongitude, note]); // Added note to dependency array
+
+  // Reverse geocode if address is missing but lat/lng exist (e.g. after param update)
+  useEffect(() => {
+    const updateAddress = async () => {
+      if ((!address || address === "") && latitude && longitude) {
+        try {
+          const res = await Location.reverseGeocodeAsync({
+            latitude,
+            longitude,
+          });
+          if (res && res.length > 0) {
+            const a = res[0];
+            setAddress(
+              [a.name, a.street, a.city, a.region, a.country]
+                .filter(Boolean)
+                .join(", ")
+            );
+          }
+        } catch {}
+      }
+    };
+    updateAddress();
+  }, [latitude, longitude, address]);
+
+  // Pick location handler
+  const handlePickLocation = () => {
+    // Pass current lat/lng to picker if available
+    router.push({
+      pathname: "/pages/selectLocation",
+      params: {
+        latitude: latitude ?? undefined,
+        longitude: longitude ?? undefined,
+        returnTo: "editNote",
+        id: id, // pass id so we can return to the correct note
+      },
+    });
+  };
 
   // Function to pick and update image
   const pickImage = async () => {
@@ -83,10 +215,17 @@ const EditNote = () => {
     try {
       await db
         .update(notes)
-        .set({ title, description, imagePath: image ?? note?.imagePath })
+        .set({
+          title,
+          description,
+          imagePath: image ?? note?.imagePath,
+          latitude: latitude,
+          longitude: longitude,
+          address: address,
+        })
         .where(eq(notes.id, Number(id)));
       Alert.alert("Success", "Note updated.", [
-        { text: "OK", onPress: () => router.back() },
+        { text: "OK", onPress: () => router.replace("/(tabs)/home") },
       ]);
     } catch (err) {
       Alert.alert("Error", "Failed to update note.");
@@ -191,6 +330,18 @@ const EditNote = () => {
             multiline
             editable={!saving && !deleting}
           />
+          <Text className="text-primary text-lg font-bold mb-2">Location</Text>
+          <TouchableOpacity
+            onPress={handlePickLocation}
+            className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center mb-4"
+            disabled={saving || deleting}
+          >
+            <View>
+              <Text className="text-accent-light text-base">
+                {address ? address : "Pick location"}
+              </Text>
+            </View>
+          </TouchableOpacity>
           <View className="flex-row justify-between mt-6">
             <TouchableOpacity
               onPress={handleSave}

@@ -14,12 +14,6 @@ export default {
       supportsTablet: true,
     },
     android: {
-      keystore: {
-        keystorePath: "android/release.keystore",
-        keystorePassword: "12345678",
-        keyAlias: "wondernotes",
-        keyPassword: "12345678",
-      },
       config: {
         googleMaps: {
           apiKey: process.env.GOOGLE_MAPS_API_KEY,
