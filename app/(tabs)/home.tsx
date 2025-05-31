@@ -1,7 +1,7 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { MagnifyingGlass, Plus } from "phosphor-react-native";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -29,7 +29,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       let isActive = true;
       const fetchNotes = async () => {
         setLoading(true);

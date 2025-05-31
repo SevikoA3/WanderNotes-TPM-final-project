@@ -42,6 +42,24 @@ export default function componentsLayout() {
             },
           }}
         />
+
+        <Stack.Screen
+          name="modal.selectLocation"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            headerShown: false,
+            title: "Pick Location",
+          }}
+        />
+
+        <Stack.Screen
+          name="viewNote"
+          options={{
+            title: "",
+            headerShown: true,
+          }}
+        />
       </Stack>
     </>
   );

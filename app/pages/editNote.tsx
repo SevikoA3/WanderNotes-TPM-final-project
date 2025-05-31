@@ -20,6 +20,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import db, { eq } from "../db/db";
 import { notes } from "../db/schema";
+import { locationEventEmitter } from "../services/locationEvents";
 
 const EditNote = () => {
   const router = useRouter();
@@ -69,29 +70,6 @@ const EditNote = () => {
     if (id) fetchNote();
   }, [id]);
 
-  // Reverse geocode if address is missing but lat/lng exist
-  useEffect(() => {
-    const getAddress = async () => {
-      if ((!address || address === "") && latitude && longitude) {
-        try {
-          const res = await Location.reverseGeocodeAsync({
-            latitude,
-            longitude,
-          });
-          if (res && res.length > 0) {
-            const a = res[0];
-            setAddress(
-              [a.name, a.street, a.city, a.region, a.country]
-                .filter(Boolean)
-                .join(", ")
-            );
-          }
-        } catch {}
-      }
-    };
-    getAddress();
-  }, [latitude, longitude]);
-
   // Handle location returned from selectLocation
   const params = useLocalSearchParams();
   useEffect(() => {
@@ -109,11 +87,7 @@ const EditNote = () => {
           });
           if (res && res.length > 0) {
             const a = res[0];
-            setAddress(
-              [a.name, a.street, a.city, a.region, a.country]
-                .filter(Boolean)
-                .join(", ")
-            );
+            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
           } else {
             setAddress("");
           }
@@ -166,11 +140,7 @@ const EditNote = () => {
           });
           if (res && res.length > 0) {
             const a = res[0];
-            setAddress(
-              [a.name, a.street, a.city, a.region, a.country]
-                .filter(Boolean)
-                .join(", ")
-            );
+            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
           }
         } catch {}
       }
@@ -178,17 +148,50 @@ const EditNote = () => {
     updateAddress();
   }, [latitude, longitude, address]);
 
+  // Update location if returned from selectLocation modal
+  useEffect(() => {
+    if (params.selectedLatitude !== undefined && params.selectedLongitude !== undefined) {
+      const lat = Number(params.selectedLatitude);
+      const lng = Number(params.selectedLongitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setLatitude(lat);
+        setLongitude(lng);
+      }
+    }
+  }, [params.selectedLatitude, params.selectedLongitude]);
+
+  // Listen for locationSelected events
+  useEffect(() => {
+    // @ts-ignore
+    const sub = locationEventEmitter.addListener("locationSelected", (loc: { latitude: number; longitude: number }) => {
+      setLatitude(loc.latitude);
+      setLongitude(loc.longitude);
+      // Langsung update address setelah lokasi berubah
+      (async () => {
+        try {
+          const res = await Location.reverseGeocodeAsync({
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          });
+          if (res && res.length > 0) {
+            const a = res[0];
+            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
+          } else {
+            setAddress("");
+          }
+        } catch {
+          setAddress("");
+        }
+      })();
+    });
+    return () => sub.remove();
+  }, []);
+
   // Pick location handler
   const handlePickLocation = () => {
-    // Pass current lat/lng to picker if available
     router.push({
-      pathname: "/pages/selectLocation",
-      params: {
-        latitude: latitude ?? undefined,
-        longitude: longitude ?? undefined,
-        returnTo: "editNote",
-        id: id, // pass id so we can return to the correct note
-      },
+      pathname: "/pages/modal.selectLocation",
+      params: latitude && longitude ? { latitude, longitude } : {},
     });
   };
 
@@ -227,9 +230,7 @@ const EditNote = () => {
           address: address,
         })
         .where(eq(notes.id, Number(id)));
-      Alert.alert("Success", "Note updated.", [
-        { text: "OK", onPress: () => router.replace("/(tabs)/home") },
-      ]);
+      Alert.alert("Success", "Note updated.", [{ text: "OK", onPress: () => router.back() }]);
     } catch (err) {
       Alert.alert("Error", "Failed to update note.");
     } finally {
@@ -247,9 +248,7 @@ const EditNote = () => {
           setDeleting(true);
           try {
             await db.delete(notes).where(eq(notes.id, Number(id)));
-            Alert.alert("Deleted", "Note deleted.", [
-              { text: "OK", onPress: () => router.replace("/(tabs)/home") },
-            ]);
+            Alert.alert("Deleted", "Note deleted.", [{ text: "OK", onPress: () => router.replace("/(tabs)/home") }]);
           } catch (err) {
             Alert.alert("Error", "Failed to delete note.");
           } finally {
@@ -280,11 +279,7 @@ const EditNote = () => {
     <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
       <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
             <View className="bg-background-light p-4">
               {/* Image Edit Area */}
               <TouchableOpacity
@@ -312,9 +307,7 @@ const EditNote = () => {
                       }}
                     >
                       <View className="flex-1 justify-center items-center rounded-xl">
-                        <Text className="text-white text-lg font-bold">
-                          Press to edit
-                        </Text>
+                        <Text className="text-white text-lg font-bold">Press to edit</Text>
                       </View>
                     </LinearGradient>
                   </ImageBackground>
@@ -327,10 +320,9 @@ const EditNote = () => {
                 className="w-full rounded-2xl bg-surface-light text-accent-light text-lg font-medium p-4 mb-4"
                 style={{ minHeight: 56 }}
                 editable={!saving && !deleting}
+                maxLength={40}
               />
-              <Text className="text-primary text-lg font-bold mb-2">
-                Description
-              </Text>
+              <Text className="text-primary text-lg font-bold mb-2">Description</Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
@@ -339,18 +331,14 @@ const EditNote = () => {
                 multiline
                 editable={!saving && !deleting}
               />
-              <Text className="text-primary text-lg font-bold mb-2">
-                Location
-              </Text>
+              <Text className="text-primary text-lg font-bold mb-2">Location</Text>
               <TouchableOpacity
                 onPress={handlePickLocation}
                 className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center mb-4"
                 disabled={saving || deleting}
               >
                 <View>
-                  <Text className="text-accent-light text-base">
-                    {address ? address : "Pick location"}
-                  </Text>
+                  <Text className="text-accent-light text-base">{address ? address : "Pick location"}</Text>
                 </View>
               </TouchableOpacity>
               <View className="flex-row justify-between mt-6">
@@ -359,18 +347,14 @@ const EditNote = () => {
                   className="bg-orange rounded-xl px-6 py-3"
                   disabled={saving || deleting}
                 >
-                  <Text className="text-white text-base font-bold">
-                    {saving ? "Saving..." : "Save"}
-                  </Text>
+                  <Text className="text-white text-base font-bold">{saving ? "Saving..." : "Save"}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleDelete}
                   className="bg-accent rounded-xl px-6 py-3"
                   disabled={saving || deleting}
                 >
-                  <Text className="text-white text-base font-bold">
-                    {deleting ? "Deleting..." : "Delete"}
-                  </Text>
+                  <Text className="text-white text-base font-bold">{deleting ? "Deleting..." : "Delete"}</Text>
                 </TouchableOpacity>
               </View>
             </View>

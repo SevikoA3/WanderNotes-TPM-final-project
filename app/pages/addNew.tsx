@@ -19,6 +19,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import db from "../db/db";
 import { notes } from "../db/schema";
+import { locationEventEmitter } from "../services/locationEvents";
 
 export default function AddNewScreen() {
   const router = useRouter();
@@ -39,17 +40,13 @@ export default function AddNewScreen() {
     const getLocation = async () => {
       setLocLoading(true);
       try {
-        const { status } = await (
-          await import("expo-location")
-        ).requestForegroundPermissionsAsync();
+        const { status } = await (await import("expo-location")).requestForegroundPermissionsAsync();
         if (status !== "granted") {
           Alert.alert("Permission denied", "Location permission is required.");
           setLocLoading(false);
           return;
         }
-        const loc = await (
-          await import("expo-location")
-        ).getCurrentPositionAsync({});
+        const loc = await (await import("expo-location")).getCurrentPositionAsync({});
         setLocation({
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
@@ -63,13 +60,22 @@ export default function AddNewScreen() {
 
     // Only fetch current GPS location if no location was passed via params
     // from the selectLocation screen.
-    if (
-      params.selectedLatitude === undefined &&
-      params.selectedLongitude === undefined
-    ) {
+    if (params.selectedLatitude === undefined && params.selectedLongitude === undefined) {
       getLocation();
     }
   }, []);
+
+  // Update location if returned from selectLocation
+  React.useEffect(() => {
+    const lat = Number(params.selectedLatitude);
+    const lng = Number(params.selectedLongitude);
+    if (params.selectedLatitude !== undefined && params.selectedLongitude !== undefined && !isNaN(lat) && !isNaN(lng)) {
+      setLocation({
+        latitude: lat,
+        longitude: lng,
+      });
+    }
+  }, [params.selectedLatitude, params.selectedLongitude]);
 
   // Reverse geocoding setiap kali location berubah
   React.useEffect(() => {
@@ -80,15 +86,11 @@ export default function AddNewScreen() {
           const res = await Location.reverseGeocodeAsync(location);
           if (res && res.length > 0) {
             const a = res[0];
-            setAddress(
-              [a.name, a.street, a.city, a.region, a.country]
-                .filter(Boolean)
-                .join(", ")
-            );
+            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
           } else {
             setAddress("");
           }
-        } catch {
+        } catch (e) {
           setAddress("");
         }
       } else {
@@ -98,22 +100,18 @@ export default function AddNewScreen() {
     getAddress();
   }, [location]);
 
-  // Update location if returned from selectLocation
+  // Listen for locationSelected event from locationEventEmitter
   React.useEffect(() => {
-    const lat = Number(params.selectedLatitude);
-    const lng = Number(params.selectedLongitude);
-    if (
-      params.selectedLatitude !== undefined &&
-      params.selectedLongitude !== undefined &&
-      !isNaN(lat) &&
-      !isNaN(lng)
-    ) {
-      setLocation({
-        latitude: lat,
-        longitude: lng,
-      });
-    }
-  }, [params.selectedLatitude, params.selectedLongitude]);
+    // @ts-ignore: event name is dynamic
+    const sub = locationEventEmitter.addListener(
+      // @ts-ignore
+      "locationSelected",
+      (loc: { latitude: number; longitude: number }) => {
+        setLocation(loc);
+      }
+    );
+    return () => sub.remove();
+  }, []);
 
   // Pick image and save to local file system
   const pickImage = async () => {
@@ -139,17 +137,8 @@ export default function AddNewScreen() {
 
   // Save note to DB
   const handleSave = async () => {
-    if (
-      !title.trim() ||
-      !description.trim() ||
-      !image ||
-      !location ||
-      !address
-    ) {
-      Alert.alert(
-        "Missing Fields",
-        "Please fill all fields, add an image, and set location."
-      );
+    if (!title.trim() || !description.trim() || !image || !location || !address) {
+      Alert.alert("Missing Fields", "Please fill all fields, add an image, and set location.");
       return;
     }
     setSaving(true);
@@ -175,29 +164,16 @@ export default function AddNewScreen() {
   // Navigasi ke page selectLocation
   const handlePickLocation = () => {
     router.push({
-      pathname: "/pages/selectLocation",
-      params: location
-        ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            returnTo: "addNew",
-          }
-        : { returnTo: "addNew" },
+      pathname: "/pages/modal.selectLocation",
+      params: location ? { latitude: location.latitude, longitude: location.longitude } : {},
     });
   };
 
   return (
     <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
       <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
-        <TouchableWithoutFeedback
-          onPress={Keyboard.dismiss}
-          style={{ flex: 1 }}
-        >
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-          >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
             {/* Image Upload Area */}
             <TouchableOpacity
               className="w-full aspect-[16/9] mb-4 px-4 rounded-xl overflow-hidden"
@@ -206,11 +182,7 @@ export default function AddNewScreen() {
             >
               {image ? (
                 <View className="flex-1 w-full h-full">
-                  <Image
-                    source={{ uri: image }}
-                    className="w-full h-full absolute rounded-xl"
-                    resizeMode="cover"
-                  />
+                  <Image source={{ uri: image }} className="w-full h-full absolute rounded-xl" resizeMode="cover" />
                   <LinearGradient
                     colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
                     style={{
@@ -223,18 +195,14 @@ export default function AddNewScreen() {
                     }}
                   >
                     <View className="flex-1 justify-center items-center rounded-xl">
-                      <Text className="text-white text-lg font-bold">
-                        Press to edit
-                      </Text>
+                      <Text className="text-white text-lg font-bold">Press to edit</Text>
                     </View>
                   </LinearGradient>
                 </View>
               ) : (
                 <View className="flex-1 w-full h-full bg-surface-light rounded-xl items-center justify-center border-2 border-dashed border-accent-light">
                   <IconImage size={48} color="#a97c5a" weight="regular" />
-                  <Text className="text-accent-light mt-2 font-medium text-base">
-                    Press to add a picture
-                  </Text>
+                  <Text className="text-accent-light mt-2 font-medium text-base">Press to add a picture</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -247,6 +215,7 @@ export default function AddNewScreen() {
                 style={{ minHeight: 56 }}
                 value={title}
                 onChangeText={setTitle}
+                maxLength={20}
               />
             </View>
             {/* Note Input */}
@@ -263,9 +232,7 @@ export default function AddNewScreen() {
             </View>
             {/* Lokasi (pindah ke atas Add to your note) */}
             <View className="px-4 pb-2">
-              <Text className="text-base text-primary font-bold mb-1">
-                Location
-              </Text>
+              <Text className="text-base text-primary font-bold mb-1">Location</Text>
               <TouchableOpacity
                 onPress={handlePickLocation}
                 className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center"
@@ -273,19 +240,13 @@ export default function AddNewScreen() {
               >
                 <View>
                   <Text className="text-accent-light text-base">
-                    {address
-                      ? address
-                      : locLoading
-                      ? "Getting location..."
-                      : "Pick location"}
+                    {address ? address : locLoading ? "Getting location..." : "Pick location"}
                   </Text>
                 </View>
               </TouchableOpacity>
             </View>
             {/* Add to your note */}
-            <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">
-              Add to your note
-            </Text>
+            <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">Add to your note</Text>
             <View className="gap-4 px-4">
               {/* Add dates */}
               <TouchableOpacity className="flex-row items-center mb-2">
@@ -311,9 +272,7 @@ export default function AddNewScreen() {
             onPress={handleSave}
             disabled={saving}
           >
-            <Text className="text-white text-lg font-bold">
-              {saving ? "Saving..." : "Save"}
-            </Text>
+            <Text className="text-white text-lg font-bold">{saving ? "Saving..." : "Save"}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

@@ -1,14 +1,7 @@
 import { eq } from "drizzle-orm";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import db from "../db/db";
 import { notes } from "../db/schema";
@@ -18,6 +11,7 @@ type Note = {
   imagePath: string | null;
   title: string;
   description: string;
+  address: string | null;
 };
 
 const ViewNoteScreen = () => {
@@ -25,28 +19,36 @@ const ViewNoteScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
-  useEffect(() => {
+  // Refactor fetchNote supaya bisa dipakai di event focus
+  const fetchNote = useCallback(async () => {
     if (id) {
-      const fetchNote = async () => {
-        setLoading(true);
-        try {
-          const noteId = parseInt(id, 10);
-          const result = await db
-            .select()
-            .from(notes)
-            .where(eq(notes.id, noteId))
-            .get();
-          setNote(result || null);
-        } catch (err) {
-          console.error("Failed to fetch note:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchNote();
+      setLoading(true);
+      try {
+        const noteId = parseInt(id, 10);
+        const result = await db.select().from(notes).where(eq(notes.id, noteId)).get();
+        setNote(result || null);
+      } catch (err) {
+        console.error("Failed to fetch note:", err);
+      } finally {
+        setLoading(false);
+      }
     }
   }, [id]);
+
+  // Hapus useEffect, ganti dengan useFocusEffect
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNote();
+    }, [fetchNote])
+  );
+
+  useEffect(() => {
+    if (note?.title) {
+      navigation.setOptions({ title: note.title });
+    }
+  }, [note?.title, navigation]);
 
   if (loading) {
     return (
@@ -65,22 +67,15 @@ const ViewNoteScreen = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <ScrollView className="flex-1">
-        <View className="p-4">
+        <View className="pb-4">
           {note.imagePath ? (
-            <Image
-              source={{ uri: note.imagePath }}
-              className="w-full h-64 rounded-lg mb-4"
-              resizeMode="cover"
-            />
+            <Image source={{ uri: note.imagePath }} className="w-full h-64 mb-4" resizeMode="cover" />
           ) : null}
-          <Text className="text-primary text-3xl font-bold mb-2">
-            {note.title}
-          </Text>
-          <Text className="text-accent text-base leading-relaxed">
-            {note.description}
-          </Text>
+          {/* Lokasi di bawah gambar */}
+          {note.address ? <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text> : null}
+          <Text className="text-accent text-base leading-relaxed m-4">{note.description}</Text>
         </View>
       </ScrollView>
       <View className="p-4 border-t border-surface">
