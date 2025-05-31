@@ -10,10 +10,19 @@ export const notes = sqliteTable("notes", {
   longitude: real("longitude"),
   address: text("address"),
   createdAt: text("created_at").notNull(),
-  tripStartDate: text("trip_start_date"),
-  tripEndDate: text("trip_end_date"),
-  reminderAt: text("reminder_at"), 
-  isReminderSet: integer("is_reminder_set", { mode: "boolean" }).default(false), 
+  reminderAt: text("reminder_at"),
+  isReminderSet: integer("is_reminder_set", { mode: "boolean" }).default(false),
+  // tripStartDate and tripEndDate removed
+});
+
+// Reminders table
+export const reminders = sqliteTable("reminders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  noteId: integer("note_id")
+    .notNull()
+    .references(() => notes.id),
+  reminderAt: text("reminder_at").notNull(),
+  createdAt: text("created_at").notNull(),
 });
 
 export default {};

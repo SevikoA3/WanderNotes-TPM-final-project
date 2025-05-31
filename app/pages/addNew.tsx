@@ -1,12 +1,11 @@
-import * as FileSystem from "expo-file-system";
+import { desc } from "drizzle-orm";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
+import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Bell, Calendar, Image as IconImage } from "phosphor-react-native";
+import { Bell, Calendar } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   Alert,
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   ScrollView,
@@ -16,10 +15,16 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ImagePickerField from "../components/ImagePickerField";
+import LocationPickerField from "../components/LocationPickerField";
+import ReminderList from "../components/ReminderList";
 import db from "../db/db";
-import { notes } from "../db/schema";
+import { notes, reminders } from "../db/schema";
 import { locationEventEmitter } from "../services/locationEvents";
+import { copyImageToAppDir } from "../utils/image";
+import { reverseGeocode } from "../utils/location";
 
 export default function AddNewScreen() {
   const router = useRouter();
@@ -34,19 +39,27 @@ export default function AddNewScreen() {
   } | null>(null);
   const [locLoading, setLocLoading] = useState(false);
   const [address, setAddress] = useState<string>("");
+  const [remindersState, setReminders] = useState<Date[]>([]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerValue, setDatePickerValue] = useState<Date>(new Date());
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   // Ambil lokasi saat ini saat komponen mount
   React.useEffect(() => {
     const getLocation = async () => {
       setLocLoading(true);
       try {
-        const { status } = await (await import("expo-location")).requestForegroundPermissionsAsync();
+        const { status } = await (
+          await import("expo-location")
+        ).requestForegroundPermissionsAsync();
         if (status !== "granted") {
           Alert.alert("Permission denied", "Location permission is required.");
           setLocLoading(false);
           return;
         }
-        const loc = await (await import("expo-location")).getCurrentPositionAsync({});
+        const loc = await (
+          await import("expo-location")
+        ).getCurrentPositionAsync({});
         setLocation({
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
@@ -60,7 +73,10 @@ export default function AddNewScreen() {
 
     // Only fetch current GPS location if no location was passed via params
     // from the selectLocation screen.
-    if (params.selectedLatitude === undefined && params.selectedLongitude === undefined) {
+    if (
+      params.selectedLatitude === undefined &&
+      params.selectedLongitude === undefined
+    ) {
       getLocation();
     }
   }, []);
@@ -69,7 +85,12 @@ export default function AddNewScreen() {
   React.useEffect(() => {
     const lat = Number(params.selectedLatitude);
     const lng = Number(params.selectedLongitude);
-    if (params.selectedLatitude !== undefined && params.selectedLongitude !== undefined && !isNaN(lat) && !isNaN(lng)) {
+    if (
+      params.selectedLatitude !== undefined &&
+      params.selectedLongitude !== undefined &&
+      !isNaN(lat) &&
+      !isNaN(lng)
+    ) {
       setLocation({
         latitude: lat,
         longitude: lng,
@@ -81,18 +102,7 @@ export default function AddNewScreen() {
   React.useEffect(() => {
     const getAddress = async () => {
       if (location) {
-        try {
-          const Location = await import("expo-location");
-          const res = await Location.reverseGeocodeAsync(location);
-          if (res && res.length > 0) {
-            const a = res[0];
-            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
-          } else {
-            setAddress("");
-          }
-        } catch (e) {
-          setAddress("");
-        }
+        setAddress(await reverseGeocode(location));
       } else {
         setAddress("");
       }
@@ -123,26 +133,64 @@ export default function AddNewScreen() {
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const pickedUri = result.assets[0].uri;
-      // Copy image to app's document directory
-      const fileName = pickedUri.split("/").pop() || `image_${Date.now()}.jpg`;
-      if (!FileSystem.documentDirectory) {
+      try {
+        const newPath = await copyImageToAppDir(pickedUri);
+        setImage(newPath);
+      } catch (e) {
         Alert.alert("Error", "File system not available.");
-        return;
       }
-      const newPath = FileSystem.documentDirectory + fileName;
-      await FileSystem.copyAsync({ from: pickedUri, to: newPath });
-      setImage(newPath);
     }
+  };
+
+  // Handler untuk menambah reminder
+  const handleAddReminder = () => {
+    setDatePickerValue(new Date());
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirmDate = (date: Date) => {
+    if (!remindersState.some((r) => r.getTime() === date.getTime())) {
+      setReminders([...remindersState, date]);
+    }
+    hideDatePicker();
+  };
+
+  // Remove reminder by index
+  const handleRemoveReminder = (idx: number) => {
+    setReminders(remindersState.filter((_, i) => i !== idx));
   };
 
   // Save note to DB
   const handleSave = async () => {
-    if (!title.trim() || !description.trim() || !image || !location || !address) {
-      Alert.alert("Missing Fields", "Please fill all fields, add an image, and set location.");
+    // Request notification permission
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission denied",
+        "Notification permission is required to set reminders."
+      );
+      return;
+    }
+    if (
+      !title.trim() ||
+      !description.trim() ||
+      !image ||
+      !location ||
+      !address
+    ) {
+      Alert.alert(
+        "Missing Fields",
+        "Please fill all fields, add an image, and set location."
+      );
       return;
     }
     setSaving(true);
     try {
+      // Simpan note
       await db.insert(notes).values({
         title,
         description,
@@ -152,6 +200,40 @@ export default function AddNewScreen() {
         address,
         createdAt: new Date().toISOString(),
       });
+      // Ambil id note yang baru
+      const lastNote = await db
+        .select()
+        .from(notes)
+        .orderBy(desc(notes.id))
+        .limit(1)
+        .get();
+      const noteId = lastNote?.id;
+      // Simpan reminders ke tabel reminders
+      if (noteId && remindersState.length > 0) {
+        for (const reminderDate of remindersState) {
+          await db.insert(reminders).values({
+            noteId,
+            reminderAt: reminderDate.toISOString(),
+            createdAt: new Date().toISOString(),
+          });
+          // Jadwalkan notifikasi
+          try {
+            const notifResult = await Notifications.scheduleNotificationAsync({
+              content: {
+                title: `Reminder: ${title}`,
+                body: description,
+                data: { noteId }, // <--- Tambahkan noteId ke data
+              },
+              trigger: {
+                date: reminderDate,
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+              },
+            });
+          } catch (e) {
+            console.log("Failed to schedule notification:", e);
+          }
+        }
+      }
       setSaving(false);
       router.back();
     } catch (err) {
@@ -165,47 +247,30 @@ export default function AddNewScreen() {
   const handlePickLocation = () => {
     router.push({
       pathname: "/pages/modal.selectLocation",
-      params: location ? { latitude: location.latitude, longitude: location.longitude } : {},
+      params: location
+        ? { latitude: location.latitude, longitude: location.longitude }
+        : {},
     });
   };
 
   return (
     <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
       <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
-          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <TouchableWithoutFeedback
+          onPress={Keyboard.dismiss}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
             {/* Image Upload Area */}
-            <TouchableOpacity
-              className="w-full aspect-[16/9] mb-4 px-4 rounded-xl overflow-hidden"
-              activeOpacity={0.8}
-              onPress={pickImage}
-            >
-              {image ? (
-                <View className="flex-1 w-full h-full">
-                  <Image source={{ uri: image }} className="w-full h-full absolute rounded-xl" resizeMode="cover" />
-                  <LinearGradient
-                    colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      borderRadius: 16,
-                    }}
-                  >
-                    <View className="flex-1 justify-center items-center rounded-xl">
-                      <Text className="text-white text-lg font-bold">Press to edit</Text>
-                    </View>
-                  </LinearGradient>
-                </View>
-              ) : (
-                <View className="flex-1 w-full h-full bg-surface-light rounded-xl items-center justify-center border-2 border-dashed border-accent-light">
-                  <IconImage size={48} color="#a97c5a" weight="regular" />
-                  <Text className="text-accent-light mt-2 font-medium text-base">Press to add a picture</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+            <ImagePickerField
+              image={image}
+              onPick={pickImage}
+              editable={!saving}
+            />
             {/* Title Input */}
             <View className="px-4 pt-2">
               <TextInput
@@ -230,38 +295,51 @@ export default function AddNewScreen() {
                 onChangeText={setDescription}
               />
             </View>
-            {/* Lokasi (pindah ke atas Add to your note) */}
-            <View className="px-4 pb-2">
-              <Text className="text-base text-primary font-bold mb-1">Location</Text>
-              <TouchableOpacity
-                onPress={handlePickLocation}
-                className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center"
-                disabled={locLoading}
-              >
-                <View>
-                  <Text className="text-accent-light text-base">
-                    {address ? address : locLoading ? "Getting location..." : "Pick location"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+            {/* Lokasi */}
+            <LocationPickerField
+              address={address}
+              loading={locLoading}
+              onPick={handlePickLocation}
+              disabled={locLoading}
+            />
             {/* Add to your note */}
-            <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">Add to your note</Text>
+            <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">
+              Add to your note
+            </Text>
             <View className="gap-4 px-4">
               {/* Add dates */}
-              <TouchableOpacity className="flex-row items-center mb-2">
+              <View className="flex-row items-center mb-2">
                 <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
                   <Calendar size={28} color="#1b130d" weight="regular" />
                 </View>
-                <Text className="text-base text-primary">Add dates</Text>
-              </TouchableOpacity>
+                <Text className="text-base text-primary">
+                  {new Date().toLocaleString()}
+                </Text>
+              </View>
               {/* Add reminder */}
-              <TouchableOpacity className="flex-row items-center mb-2">
+              <TouchableOpacity
+                className="flex-row items-center mb-2"
+                onPress={handleAddReminder}
+              >
                 <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
                   <Bell size={28} color="#1b130d" weight="regular" />
                 </View>
                 <Text className="text-base text-primary">Add reminder</Text>
               </TouchableOpacity>
+              {/* List reminders */}
+              <ReminderList
+                reminders={remindersState}
+                onRemove={handleRemoveReminder}
+              />
+              {/* DateTimePicker */}
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="datetime"
+                date={datePickerValue}
+                onConfirm={handleConfirmDate}
+                onCancel={hideDatePicker}
+                minimumDate={new Date()}
+              />
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -272,7 +350,9 @@ export default function AddNewScreen() {
             onPress={handleSave}
             disabled={saving}
           >
-            <Text className="text-white text-lg font-bold">{saving ? "Saving..." : "Save"}</Text>
+            <Text className="text-white text-lg font-bold">
+              {saving ? "Saving..." : "Save"}
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

@@ -1,10 +1,24 @@
 import { eq } from "drizzle-orm";
-import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
+import { Calendar } from "phosphor-react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ReminderList from "../components/ReminderList";
 import db from "../db/db";
-import { notes } from "../db/schema";
+import { notes, reminders } from "../db/schema";
 
 type Note = {
   id: number;
@@ -19,6 +33,8 @@ const ViewNoteScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
+  const [remindersState, setReminders] = useState<Date[]>([]);
+  const [createdAt, setCreatedAt] = useState<string>("");
   const navigation = useNavigation();
 
   // Refactor fetchNote supaya bisa dipakai di event focus
@@ -27,8 +43,20 @@ const ViewNoteScreen = () => {
       setLoading(true);
       try {
         const noteId = parseInt(id, 10);
-        const result = await db.select().from(notes).where(eq(notes.id, noteId)).get();
+        const result = await db
+          .select()
+          .from(notes)
+          .where(eq(notes.id, noteId))
+          .get();
         setNote(result || null);
+        // Fetch reminders and createdAt after note is loaded
+        const reminderRows = await db
+          .select()
+          .from(reminders)
+          .where(eq(reminders.noteId, noteId))
+          .all();
+        setReminders(reminderRows.map((r) => new Date(r.reminderAt)));
+        setCreatedAt(result?.createdAt || "");
       } catch (err) {
         console.error("Failed to fetch note:", err);
       } finally {
@@ -72,12 +100,35 @@ const ViewNoteScreen = () => {
         <View className="pb-4">
           {note.imagePath ? (
             <View className="p-4">
-              <Image source={{ uri: note.imagePath }} className="w-full rounded-lg h-64 mb-4" resizeMode="cover" />
+              <Image
+                source={{ uri: note.imagePath }}
+                className="w-full rounded-lg h-64 mb-4"
+                resizeMode="cover"
+              />
             </View>
           ) : null}
           {/* Lokasi di bawah gambar */}
-          {note.address ? <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text> : null}
-          <Text className="text-accent text-base leading-relaxed m-4">{note.description}</Text>
+          {note.address ? (
+            <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text>
+          ) : null}
+          <Text className="text-accent text-base leading-relaxed m-4">
+            {note.description}
+          </Text>
+          {/* Tanggal dibuat dan reminders */}
+          <View className="flex-row items-center mb-2 mx-4">
+            <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+              <Calendar size={28} color="#1b130d" weight="regular" />
+            </View>
+            <Text className="text-base text-primary">
+              {createdAt ? new Date(createdAt).toLocaleString() : "-"}
+            </Text>
+          </View>
+          {/* List reminders */}
+          <ReminderList
+            reminders={remindersState}
+            removable={false}
+            className="mx-4"
+          />
         </View>
       </ScrollView>
       <View className="p-4 border-t border-surface">

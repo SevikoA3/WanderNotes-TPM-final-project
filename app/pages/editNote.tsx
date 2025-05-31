@@ -1,13 +1,12 @@
-import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
+import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Bell, Calendar } from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   ScrollView,
@@ -17,10 +16,16 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ImagePickerField from "../components/ImagePickerField";
+import LocationPickerField from "../components/LocationPickerField";
+import ReminderList from "../components/ReminderList";
 import db, { eq } from "../db/db";
-import { notes } from "../db/schema";
+import { notes, reminders } from "../db/schema";
 import { locationEventEmitter } from "../services/locationEvents";
+import { copyImageToAppDir } from "../utils/image";
+import { reverseGeocode } from "../utils/location";
 
 const EditNote = () => {
   const router = useRouter();
@@ -42,6 +47,11 @@ const EditNote = () => {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [address, setAddress] = useState<string>("");
+  const [remindersState, setReminders] = useState<Date[]>([]);
+  const [reminderIds, setReminderIds] = useState<number[]>([]);
+  const [createdAt, setCreatedAt] = useState<string>("");
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [datePickerValue, setDatePickerValue] = useState(new Date());
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -87,7 +97,11 @@ const EditNote = () => {
           });
           if (res && res.length > 0) {
             const a = res[0];
-            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
+            setAddress(
+              [a.name, a.street, a.city, a.region, a.country]
+                .filter(Boolean)
+                .join(", ")
+            );
           } else {
             setAddress("");
           }
@@ -133,16 +147,7 @@ const EditNote = () => {
   useEffect(() => {
     const updateAddress = async () => {
       if ((!address || address === "") && latitude && longitude) {
-        try {
-          const res = await Location.reverseGeocodeAsync({
-            latitude,
-            longitude,
-          });
-          if (res && res.length > 0) {
-            const a = res[0];
-            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
-          }
-        } catch {}
+        setAddress(await reverseGeocode({ latitude, longitude }));
       }
     };
     updateAddress();
@@ -150,7 +155,10 @@ const EditNote = () => {
 
   // Update location if returned from selectLocation modal
   useEffect(() => {
-    if (params.selectedLatitude !== undefined && params.selectedLongitude !== undefined) {
+    if (
+      params.selectedLatitude !== undefined &&
+      params.selectedLongitude !== undefined
+    ) {
       const lat = Number(params.selectedLatitude);
       const lng = Number(params.selectedLongitude);
       if (!isNaN(lat) && !isNaN(lng)) {
@@ -163,27 +171,34 @@ const EditNote = () => {
   // Listen for locationSelected events
   useEffect(() => {
     // @ts-ignore
-    const sub = locationEventEmitter.addListener("locationSelected", (loc: { latitude: number; longitude: number }) => {
-      setLatitude(loc.latitude);
-      setLongitude(loc.longitude);
-      // Langsung update address setelah lokasi berubah
-      (async () => {
-        try {
-          const res = await Location.reverseGeocodeAsync({
-            latitude: loc.latitude,
-            longitude: loc.longitude,
-          });
-          if (res && res.length > 0) {
-            const a = res[0];
-            setAddress([a.name, a.street, a.city, a.region, a.country].filter(Boolean).join(", "));
-          } else {
+    const sub = (locationEventEmitter as any).addListener(
+      "locationSelected",
+      (loc: { latitude: number; longitude: number }) => {
+        setLatitude(loc.latitude);
+        setLongitude(loc.longitude);
+        // Langsung update address setelah lokasi berubah
+        (async () => {
+          try {
+            const res = await Location.reverseGeocodeAsync({
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            });
+            if (res && res.length > 0) {
+              const a = res[0];
+              setAddress(
+                [a.name, a.street, a.city, a.region, a.country]
+                  .filter(Boolean)
+                  .join(", ")
+              );
+            } else {
+              setAddress("");
+            }
+          } catch {
             setAddress("");
           }
-        } catch {
-          setAddress("");
-        }
-      })();
-    });
+        })();
+      }
+    );
     return () => sub.remove();
   }, []);
 
@@ -205,14 +220,12 @@ const EditNote = () => {
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const pickedUri = result.assets[0].uri;
-      const fileName = pickedUri.split("/").pop() || `image_${Date.now()}.jpg`;
-      if (!FileSystem.documentDirectory) {
+      try {
+        const newPath = await copyImageToAppDir(pickedUri);
+        setImage(newPath);
+      } catch (e) {
         Alert.alert("Error", "File system not available.");
-        return;
       }
-      const newPath = FileSystem.documentDirectory + fileName;
-      await FileSystem.copyAsync({ from: pickedUri, to: newPath });
-      setImage(newPath);
     }
   };
 
@@ -230,7 +243,9 @@ const EditNote = () => {
           address: address,
         })
         .where(eq(notes.id, Number(id)));
-      Alert.alert("Success", "Note updated.", [{ text: "OK", onPress: () => router.back() }]);
+      Alert.alert("Success", "Note updated.", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
     } catch (err) {
       Alert.alert("Error", "Failed to update note.");
     } finally {
@@ -248,7 +263,9 @@ const EditNote = () => {
           setDeleting(true);
           try {
             await db.delete(notes).where(eq(notes.id, Number(id)));
-            Alert.alert("Deleted", "Note deleted.", [{ text: "OK", onPress: () => router.replace("/(tabs)/home") }]);
+            Alert.alert("Deleted", "Note deleted.", [
+              { text: "OK", onPress: () => router.replace("/(tabs)/home") },
+            ]);
           } catch (err) {
             Alert.alert("Error", "Failed to delete note.");
           } finally {
@@ -257,6 +274,100 @@ const EditNote = () => {
         },
       },
     ]);
+  };
+
+  useEffect(() => {
+    const fetchReminders = async () => {
+      if (id) {
+        const reminderRows = await db
+          .select()
+          .from(reminders)
+          .where(eq(reminders.noteId, Number(id)))
+          .all();
+        setReminders(reminderRows.map((r) => new Date(r.reminderAt)));
+        setReminderIds(reminderRows.map((r) => r.id));
+      }
+    };
+    const fetchNoteCreatedAt = async () => {
+      if (id) {
+        const noteRow = await db
+          .select()
+          .from(notes)
+          .where(eq(notes.id, Number(id)))
+          .get();
+        setCreatedAt(noteRow?.createdAt || "");
+      }
+    };
+    fetchReminders();
+    fetchNoteCreatedAt();
+  }, [id]);
+
+  const handleAddReminder = () => {
+    setDatePickerValue(new Date());
+    setDatePickerVisibility(true);
+  };
+  const hideDatePicker = () => setDatePickerVisibility(false);
+  const handleConfirmDate = async (date: Date) => {
+    // Minta permission notifikasi
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission denied",
+        "Notification permission is required to set reminders."
+      );
+      hideDatePicker();
+      return;
+    }
+    if (!remindersState.some((r) => r.getTime() === date.getTime())) {
+      // Insert to DB
+      if (id) {
+        const result = await db.insert(reminders).values({
+          noteId: Number(id),
+          reminderAt: date.toISOString(),
+          createdAt: new Date().toISOString(),
+        });
+        // Jadwalkan notifikasi
+        try {
+          const notifResult = await Notifications.scheduleNotificationAsync({
+            content: {
+              title: `Reminder: ${title}`,
+              body: description,
+              data: { noteId: id }, // <--- Tambahkan noteId ke data
+            },
+            trigger: {
+              date,
+              type: Notifications.SchedulableTriggerInputTypes.DATE,
+            },
+          });
+        } catch (e) {
+          console.log("Failed to schedule notification (edit):", e);
+        }
+        // Re-fetch reminders
+        const reminderRows = await db
+          .select()
+          .from(reminders)
+          .where(eq(reminders.noteId, Number(id)))
+          .all();
+        setReminders(reminderRows.map((r) => new Date(r.reminderAt)));
+        setReminderIds(reminderRows.map((r) => r.id));
+      }
+    }
+    hideDatePicker();
+  };
+  const handleRemoveReminder = async (idx: number) => {
+    if (reminderIds[idx]) {
+      await db.delete(reminders).where(eq(reminders.id, reminderIds[idx]));
+      // Re-fetch reminders
+      if (id) {
+        const reminderRows = await db
+          .select()
+          .from(reminders)
+          .where(eq(reminders.noteId, Number(id)))
+          .all();
+        setReminders(reminderRows.map((r) => new Date(r.reminderAt)));
+        setReminderIds(reminderRows.map((r) => r.id));
+      }
+    }
   };
 
   if (loading) {
@@ -286,39 +397,11 @@ const EditNote = () => {
           >
             <View className="bg-background-light p-4">
               {/* Image Edit Area */}
-              <TouchableOpacity
-                className="w-full aspect-[16/9] rounded-xl mb-4 overflow-hidden"
-                activeOpacity={0.8}
-                onPress={pickImage}
-                disabled={saving || deleting}
-              >
-                <View className="flex-1 w-full h-full">
-                  <ImageBackground
-                    source={{ uri: image ?? note.imagePath }}
-                    className="w-full h-full rounded-xl"
-                    imageStyle={{ borderRadius: 16 }}
-                    resizeMode="cover"
-                  >
-                    <LinearGradient
-                      colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        bottom: 0,
-                        borderRadius: 16,
-                      }}
-                    >
-                      <View className="flex-1 justify-center items-center rounded-xl">
-                        <Text className="text-white text-lg font-bold">
-                          Press to edit
-                        </Text>
-                      </View>
-                    </LinearGradient>
-                  </ImageBackground>
-                </View>
-              </TouchableOpacity>
+              <ImagePickerField
+                image={image ?? note?.imagePath ?? null}
+                onPick={pickImage}
+                editable={!saving && !deleting}
+              />
               <Text className="text-primary text-lg font-bold mb-2">Title</Text>
               <TextInput
                 value={title}
@@ -339,20 +422,44 @@ const EditNote = () => {
                 multiline
                 editable={!saving && !deleting}
               />
-              <Text className="text-primary text-lg font-bold mb-2">
-                Location
-              </Text>
-              <TouchableOpacity
-                onPress={handlePickLocation}
-                className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center mb-4"
+              <LocationPickerField
+                address={address}
+                loading={false}
+                onPick={handlePickLocation}
                 disabled={saving || deleting}
-              >
-                <View>
-                  <Text className="text-accent-light text-base">
-                    {address ? address : "Pick location"}
-                  </Text>
+              />
+              {/* Add dates */}
+              <View className="flex-row items-center mb-2">
+                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+                  <Calendar size={28} color="#1b130d" weight="regular" />
                 </View>
+                <Text className="text-base text-primary">
+                  {createdAt ? new Date(createdAt).toLocaleString() : "-"}
+                </Text>
+              </View>
+              {/* Add reminder */}
+              <TouchableOpacity
+                className="flex-row items-center mb-2"
+                onPress={handleAddReminder}
+              >
+                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+                  <Bell size={28} color="#1b130d" weight="regular" />
+                </View>
+                <Text className="text-base text-primary">Add reminder</Text>
               </TouchableOpacity>
+              {/* List reminders */}
+              <ReminderList
+                reminders={remindersState}
+                onRemove={handleRemoveReminder}
+              />
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="datetime"
+                date={datePickerValue}
+                onConfirm={handleConfirmDate}
+                onCancel={hideDatePicker}
+                minimumDate={new Date()}
+              />
               <View className="flex-row justify-between mt-6">
                 <TouchableOpacity
                   onPress={handleSave}

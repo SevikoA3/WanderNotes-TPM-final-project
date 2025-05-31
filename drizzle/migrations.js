@@ -8,6 +8,7 @@ import m0003 from './0003_noisy_robbie_robertson.sql';
 import m0004 from './0004_white_shaman.sql';
 import m0005 from './0005_late_azazel.sql';
 import m0006 from './0006_jazzy_zuras.sql';
+import m0007 from './0007_colossal_ben_parker.sql';
 
   export default {
     journal,
@@ -18,7 +19,8 @@ m0002,
 m0003,
 m0004,
 m0005,
-m0006
+m0006,
+m0007
     }
   }
   

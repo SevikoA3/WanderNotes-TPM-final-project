@@ -1,4 +1,3 @@
-// This file is now a modal route for selecting a location
 import * as Location from "expo-location";
 import { GoogleMaps } from "expo-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
