@@ -7,10 +7,13 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -184,125 +187,136 @@ export default function AddNewScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Image Upload Area */}
-        <TouchableOpacity
-          className="w-full aspect-[16/9] mb-4 px-4 rounded-xl overflow-hidden"
-          activeOpacity={0.8}
-          onPress={pickImage}
+    <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
+      <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
+        <TouchableWithoutFeedback
+          onPress={Keyboard.dismiss}
+          style={{ flex: 1 }}
         >
-          {image ? (
-            <View className="flex-1 w-full h-full">
-              <Image
-                source={{ uri: image }}
-                className="w-full h-full absolute rounded-xl"
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  borderRadius: 16,
-                }}
-              >
-                <View className="flex-1 justify-center items-center rounded-xl">
-                  <Text className="text-white text-lg font-bold">
-                    Press to edit
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Image Upload Area */}
+            <TouchableOpacity
+              className="w-full aspect-[16/9] mb-4 px-4 rounded-xl overflow-hidden"
+              activeOpacity={0.8}
+              onPress={pickImage}
+            >
+              {image ? (
+                <View className="flex-1 w-full h-full">
+                  <Image
+                    source={{ uri: image }}
+                    className="w-full h-full absolute rounded-xl"
+                    resizeMode="cover"
+                  />
+                  <LinearGradient
+                    colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      borderRadius: 16,
+                    }}
+                  >
+                    <View className="flex-1 justify-center items-center rounded-xl">
+                      <Text className="text-white text-lg font-bold">
+                        Press to edit
+                      </Text>
+                    </View>
+                  </LinearGradient>
+                </View>
+              ) : (
+                <View className="flex-1 w-full h-full bg-surface-light rounded-xl items-center justify-center border-2 border-dashed border-accent-light">
+                  <IconImage size={48} color="#a97c5a" weight="regular" />
+                  <Text className="text-accent-light mt-2 font-medium text-base">
+                    Press to add a picture
                   </Text>
                 </View>
-              </LinearGradient>
+              )}
+            </TouchableOpacity>
+            {/* Title Input */}
+            <View className="px-4 pt-2">
+              <TextInput
+                placeholder="Trip title"
+                placeholderTextColor="#a97c5a"
+                className="w-full rounded-2xl bg-surface-light text-accent-light text-lg font-medium p-4 mb-4"
+                style={{ minHeight: 56 }}
+                value={title}
+                onChangeText={setTitle}
+              />
             </View>
-          ) : (
-            <View className="flex-1 w-full h-full bg-surface-light rounded-xl items-center justify-center border-2 border-dashed border-accent-light">
-              <IconImage size={48} color="#a97c5a" weight="regular" />
-              <Text className="text-accent-light mt-2 font-medium text-base">
-                Press to add a picture
+            {/* Note Input */}
+            <View className="px-4">
+              <TextInput
+                placeholder="Write your note here..."
+                placeholderTextColor="#a97c5a"
+                className="w-full rounded-2xl bg-surface-light text-accent-light text-base font-normal p-4 mb-4"
+                style={{ minHeight: 120, textAlignVertical: "top" }}
+                multiline
+                value={description}
+                onChangeText={setDescription}
+              />
+            </View>
+            {/* Lokasi (pindah ke atas Add to your note) */}
+            <View className="px-4 pb-2">
+              <Text className="text-base text-primary font-bold mb-1">
+                Location
               </Text>
+              <TouchableOpacity
+                onPress={handlePickLocation}
+                className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center"
+                disabled={locLoading}
+              >
+                <View>
+                  <Text className="text-accent-light text-base">
+                    {address
+                      ? address
+                      : locLoading
+                      ? "Getting location..."
+                      : "Pick location"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </View>
-          )}
-        </TouchableOpacity>
-        {/* Title Input */}
-        <View className="px-4 pt-2">
-          <TextInput
-            placeholder="Trip title"
-            placeholderTextColor="#a97c5a"
-            className="w-full rounded-2xl bg-surface-light text-accent-light text-lg font-medium p-4 mb-4"
-            style={{ minHeight: 56 }}
-            value={title}
-            onChangeText={setTitle}
-          />
-        </View>
-        {/* Note Input */}
-        <View className="px-4">
-          <TextInput
-            placeholder="Write your note here..."
-            placeholderTextColor="#a97c5a"
-            className="w-full rounded-2xl bg-surface-light text-accent-light text-base font-normal p-4 mb-4"
-            style={{ minHeight: 120, textAlignVertical: "top" }}
-            multiline
-            value={description}
-            onChangeText={setDescription}
-          />
-        </View>
-        {/* Lokasi (pindah ke atas Add to your note) */}
-        <View className="px-4 pb-2">
-          <Text className="text-base text-primary font-bold mb-1">
-            Location
-          </Text>
+            {/* Add to your note */}
+            <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">
+              Add to your note
+            </Text>
+            <View className="gap-4 px-4">
+              {/* Add dates */}
+              <TouchableOpacity className="flex-row items-center mb-2">
+                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+                  <Calendar size={28} color="#1b130d" weight="regular" />
+                </View>
+                <Text className="text-base text-primary">Add dates</Text>
+              </TouchableOpacity>
+              {/* Add reminder */}
+              <TouchableOpacity className="flex-row items-center mb-2">
+                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
+                  <Bell size={28} color="#1b130d" weight="regular" />
+                </View>
+                <Text className="text-base text-primary">Add reminder</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+        {/* Save Button */}
+        <View className="px-4 pb-6 pt-2 bg-transparent">
           <TouchableOpacity
-            onPress={handlePickLocation}
-            className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center"
-            disabled={locLoading}
+            className="w-full h-14 rounded-2xl bg-orange-dark items-center justify-center"
+            onPress={handleSave}
+            disabled={saving}
           >
-            <View>
-              <Text className="text-accent-light text-base">
-                {address
-                  ? address
-                  : locLoading
-                  ? "Getting location..."
-                  : "Pick location"}
-              </Text>
-            </View>
+            <Text className="text-white text-lg font-bold">
+              {saving ? "Saving..." : "Save"}
+            </Text>
           </TouchableOpacity>
         </View>
-        {/* Add to your note */}
-        <Text className="px-4 pt-4 pb-2 text-lg font-bold text-primary">
-          Add to your note
-        </Text>
-        <View className="gap-4 px-4">
-          {/* Add dates */}
-          <TouchableOpacity className="flex-row items-center mb-2">
-            <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-              <Calendar size={28} color="#1b130d" weight="regular" />
-            </View>
-            <Text className="text-base text-primary">Add dates</Text>
-          </TouchableOpacity>
-          {/* Add reminder */}
-          <TouchableOpacity className="flex-row items-center mb-2">
-            <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-              <Bell size={28} color="#1b130d" weight="regular" />
-            </View>
-            <Text className="text-base text-primary">Add reminder</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-      {/* Save Button */}
-      <View className="px-4 pb-6 pt-2 bg-transparent">
-        <TouchableOpacity
-          className="w-full h-14 rounded-2xl bg-orange-dark items-center justify-center"
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Text className="text-white text-lg font-bold">
-            {saving ? "Saving..." : "Save"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }

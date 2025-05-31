@@ -8,10 +8,13 @@ import {
   ActivityIndicator,
   Alert,
   ImageBackground,
+  Keyboard,
+  KeyboardAvoidingView,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -274,97 +277,107 @@ const EditNote = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 bg-background-light p-4">
-          {/* Image Edit Area */}
-          <TouchableOpacity
-            className="w-full aspect-[16/9] rounded-xl mb-4 overflow-hidden"
-            activeOpacity={0.8}
-            onPress={pickImage}
-            disabled={saving || deleting}
+    <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
+      <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
           >
-            <View className="flex-1 w-full h-full">
-              <ImageBackground
-                source={{ uri: image ?? note.imagePath }}
-                className="w-full h-full rounded-xl"
-                imageStyle={{ borderRadius: 16 }}
-                resizeMode="cover"
+            <View className="bg-background-light p-4">
+              {/* Image Edit Area */}
+              <TouchableOpacity
+                className="w-full aspect-[16/9] rounded-xl mb-4 overflow-hidden"
+                activeOpacity={0.8}
+                onPress={pickImage}
+                disabled={saving || deleting}
               >
-                <LinearGradient
-                  colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    borderRadius: 16,
-                  }}
+                <View className="flex-1 w-full h-full">
+                  <ImageBackground
+                    source={{ uri: image ?? note.imagePath }}
+                    className="w-full h-full rounded-xl"
+                    imageStyle={{ borderRadius: 16 }}
+                    resizeMode="cover"
+                  >
+                    <LinearGradient
+                      colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.35)"]}
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        borderRadius: 16,
+                      }}
+                    >
+                      <View className="flex-1 justify-center items-center rounded-xl">
+                        <Text className="text-white text-lg font-bold">
+                          Press to edit
+                        </Text>
+                      </View>
+                    </LinearGradient>
+                  </ImageBackground>
+                </View>
+              </TouchableOpacity>
+              <Text className="text-primary text-lg font-bold mb-2">Title</Text>
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                className="w-full rounded-2xl bg-surface-light text-accent-light text-lg font-medium p-4 mb-4"
+                style={{ minHeight: 56 }}
+                editable={!saving && !deleting}
+              />
+              <Text className="text-primary text-lg font-bold mb-2">
+                Description
+              </Text>
+              <TextInput
+                value={description}
+                onChangeText={setDescription}
+                className="w-full rounded-2xl bg-surface-light text-accent-light text-base font-normal p-4 mb-4"
+                style={{ minHeight: 120, textAlignVertical: "top" }}
+                multiline
+                editable={!saving && !deleting}
+              />
+              <Text className="text-primary text-lg font-bold mb-2">
+                Location
+              </Text>
+              <TouchableOpacity
+                onPress={handlePickLocation}
+                className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center mb-4"
+                disabled={saving || deleting}
+              >
+                <View>
+                  <Text className="text-accent-light text-base">
+                    {address ? address : "Pick location"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <View className="flex-row justify-between mt-6">
+                <TouchableOpacity
+                  onPress={handleSave}
+                  className="bg-orange rounded-xl px-6 py-3"
+                  disabled={saving || deleting}
                 >
-                  <View className="flex-1 justify-center items-center rounded-xl">
-                    <Text className="text-white text-lg font-bold">
-                      Press to edit
-                    </Text>
-                  </View>
-                </LinearGradient>
-              </ImageBackground>
+                  <Text className="text-white text-base font-bold">
+                    {saving ? "Saving..." : "Save"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  className="bg-accent rounded-xl px-6 py-3"
+                  disabled={saving || deleting}
+                >
+                  <Text className="text-white text-base font-bold">
+                    {deleting ? "Deleting..." : "Delete"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </TouchableOpacity>
-          <Text className="text-primary text-lg font-bold mb-2">Title</Text>
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            className="w-full rounded-2xl bg-surface-light text-accent-light text-lg font-medium p-4 mb-4"
-            style={{ minHeight: 56 }}
-            editable={!saving && !deleting}
-          />
-          <Text className="text-primary text-lg font-bold mb-2">
-            Description
-          </Text>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            className="w-full rounded-2xl bg-surface-light text-accent-light text-base font-normal p-4 mb-4"
-            style={{ minHeight: 120, textAlignVertical: "top" }}
-            multiline
-            editable={!saving && !deleting}
-          />
-          <Text className="text-primary text-lg font-bold mb-2">Location</Text>
-          <TouchableOpacity
-            onPress={handlePickLocation}
-            className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center mb-4"
-            disabled={saving || deleting}
-          >
-            <View>
-              <Text className="text-accent-light text-base">
-                {address ? address : "Pick location"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <View className="flex-row justify-between mt-6">
-            <TouchableOpacity
-              onPress={handleSave}
-              className="bg-orange rounded-xl px-6 py-3"
-              disabled={saving || deleting}
-            >
-              <Text className="text-white text-base font-bold">
-                {saving ? "Saving..." : "Save"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleDelete}
-              className="bg-accent rounded-xl px-6 py-3"
-              disabled={saving || deleting}
-            >
-              <Text className="text-white text-base font-bold">
-                {deleting ? "Deleting..." : "Delete"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 

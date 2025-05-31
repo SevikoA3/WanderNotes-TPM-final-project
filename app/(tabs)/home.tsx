@@ -100,7 +100,7 @@ const HomeScreen = () => {
                   note={note}
                   onPress={() =>
                     router.push({
-                      pathname: "/pages/editNote",
+                      pathname: "/pages/viewNote",
                       params: { id: note.id },
                     })
                   }
