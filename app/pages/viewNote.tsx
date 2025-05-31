@@ -71,7 +71,9 @@ const ViewNoteScreen = () => {
       <ScrollView className="flex-1">
         <View className="pb-4">
           {note.imagePath ? (
-            <Image source={{ uri: note.imagePath }} className="w-full h-64 mb-4" resizeMode="cover" />
+            <View className="p-4">
+              <Image source={{ uri: note.imagePath }} className="w-full rounded-lg h-64 mb-4" resizeMode="cover" />
+            </View>
           ) : null}
           {/* Lokasi di bawah gambar */}
           {note.address ? <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text> : null}
