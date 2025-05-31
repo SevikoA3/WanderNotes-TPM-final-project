@@ -279,7 +279,11 @@ const EditNote = () => {
     <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
       <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
             <View className="bg-background-light p-4">
               {/* Image Edit Area */}
               <TouchableOpacity
@@ -307,7 +311,9 @@ const EditNote = () => {
                       }}
                     >
                       <View className="flex-1 justify-center items-center rounded-xl">
-                        <Text className="text-white text-lg font-bold">Press to edit</Text>
+                        <Text className="text-white text-lg font-bold">
+                          Press to edit
+                        </Text>
                       </View>
                     </LinearGradient>
                   </ImageBackground>
@@ -322,7 +328,9 @@ const EditNote = () => {
                 editable={!saving && !deleting}
                 maxLength={40}
               />
-              <Text className="text-primary text-lg font-bold mb-2">Description</Text>
+              <Text className="text-primary text-lg font-bold mb-2">
+                Description
+              </Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
@@ -331,30 +339,38 @@ const EditNote = () => {
                 multiline
                 editable={!saving && !deleting}
               />
-              <Text className="text-primary text-lg font-bold mb-2">Location</Text>
+              <Text className="text-primary text-lg font-bold mb-2">
+                Location
+              </Text>
               <TouchableOpacity
                 onPress={handlePickLocation}
                 className="rounded-xl bg-surface-light px-4 py-3 flex-row items-center mb-4"
                 disabled={saving || deleting}
               >
                 <View>
-                  <Text className="text-accent-light text-base">{address ? address : "Pick location"}</Text>
+                  <Text className="text-accent-light text-base">
+                    {address ? address : "Pick location"}
+                  </Text>
                 </View>
               </TouchableOpacity>
               <View className="flex-row justify-between mt-6">
                 <TouchableOpacity
                   onPress={handleSave}
-                  className="bg-orange rounded-xl px-6 py-3"
+                  className="bg-orange rounded-l-xl px-6 py-3 w-[50%] items-center"
                   disabled={saving || deleting}
                 >
-                  <Text className="text-white text-base font-bold">{saving ? "Saving..." : "Save"}</Text>
+                  <Text className="text-white text-base font-bold">
+                    {saving ? "Saving..." : "Save"}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleDelete}
-                  className="bg-accent rounded-xl px-6 py-3"
+                  className="bg-accent rounded-r-xl px-6 py-3 w-[50%] items-center"
                   disabled={saving || deleting}
                 >
-                  <Text className="text-white text-base font-bold">{deleting ? "Deleting..." : "Delete"}</Text>
+                  <Text className="text-white text-base font-bold">
+                    {deleting ? "Deleting..." : "Delete"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
