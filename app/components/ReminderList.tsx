@@ -27,7 +27,7 @@ const ReminderList: React.FC<ReminderListProps> = ({
           </Text>
           {removable && onRemove && (
             <TouchableOpacity onPress={() => onRemove(idx)}>
-              <Text className="text-orange-dark font-bold">Remove</Text>
+              <Text className="text-accent font-bold">Remove</Text>
             </TouchableOpacity>
           )}
         </View>

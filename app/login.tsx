@@ -63,9 +63,7 @@ export default function LoginScreen() {
       {/* Top Image */}
       <View className="w-full h-64">
         <Image
-          source={{
-            uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuADiG6jr8EQlhzn_oDCw4Xhbr_zYm_7ZJPDQ6lE7E3bv2pnBxOQ7_tgs2N0rDlfVYieM7g328L861sQmfpLsAT6YUEgeo3dMtyCCqv8wLvrM8ehcMsCuwES0vM82K1d1o5itVyFJ5dzXsPIMqT0wlSeqJbvyFnKdsNKjdw5REIyUVDksfkSjlEPZLJ4S8YrKsHiixFGsPdE_9xxgLRlKDVqWRqdvgTLhvu3VxJPvvwhIX0yluduVTiwEbKAQDrN_HZPKD7lsxF-KqcC",
-          }}
+          source={require("../assets/images/backgroundImageSea.png")}
           className="w-full h-full object-cover"
         />
       </View>

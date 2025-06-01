@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Bell, Calendar } from "phosphor-react-native";
+import { Bell } from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -70,7 +70,7 @@ const EditNote = () => {
             setNote(null);
             setLoading(false);
             Alert.alert("Forbidden", "You are not allowed to edit this note.", [
-              { text: "OK", onPress: () => router.replace("./(tabs)/home") },
+              { text: "OK", onPress: () => router.replace("/home") },
             ]);
             return;
           }
@@ -283,7 +283,7 @@ const EditNote = () => {
           try {
             await db.delete(notes).where(eq(notes.id, Number(id)));
             Alert.alert("Deleted", "Note deleted.", [
-              { text: "OK", onPress: () => router.replace("./(tabs)/home") },
+              { text: "OK", onPress: () => router.replace("/home") },
             ]);
           } catch (err) {
             Alert.alert("Error", "Failed to delete note.");
@@ -454,7 +454,7 @@ const EditNote = () => {
                 <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
                   <Bell size={28} color="#1b130d" weight="regular" />
                 </View>
-                <Text className="text-base text-primary">Add reminder</Text>
+                <Text className="text-base text-accent">Add reminder</Text>
               </TouchableOpacity>
               {/* List reminders */}
               <ReminderList
@@ -463,10 +463,8 @@ const EditNote = () => {
               />
               {/* Add created date below reminders */}
               <View className="flex-row items-center mb-2 mt-2">
-                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-                  <Calendar size={28} color="#1b130d" weight="regular" />
-                </View>
-                <Text className="text-base text-primary">
+                <Text className="text-base text-accent">
+                  Created At:{" "}
                   {createdAt
                     ? new Date(createdAt).toLocaleDateString("en-GB", {
                         day: "2-digit",

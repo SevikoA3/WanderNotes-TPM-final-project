@@ -2,7 +2,7 @@ import { desc } from "drizzle-orm";
 import * as ImagePicker from "expo-image-picker";
 import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Bell, Calendar } from "phosphor-react-native";
+import { Bell } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -322,7 +322,7 @@ export default function AddNewScreen() {
                 <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
                   <Bell size={28} color="#1b130d" weight="regular" />
                 </View>
-                <Text className="text-base text-primary">Add reminder</Text>
+                <Text className="text-base text-accent">Add reminder</Text>
               </TouchableOpacity>
               {/* List reminders */}
               <ReminderList
@@ -330,11 +330,9 @@ export default function AddNewScreen() {
                 onRemove={handleRemoveReminder}
               />
               {/* Add created date below reminders */}
-              <View className="flex-row items-center mb-2 mt-2">
-                <View className="size-12 rounded-xl bg-surface-light items-center justify-center mr-4">
-                  <Calendar size={28} color="#1b130d" weight="regular" />
-                </View>
-                <Text className="text-base text-primary">
+              <View className="flex mb-2">
+                <Text className="text-base text-accent">
+                  Created At:{" "}
                   {new Date().toLocaleDateString("en-GB", {
                     day: "2-digit",
                     month: "long",
