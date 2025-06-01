@@ -1,14 +1,16 @@
+// {Header Part}
 import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect } from "expo-router";
 import { Pedometer } from "expo-sensors";
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import db, { eq } from "../../db/db";
 import { notes } from "../../db/schema";
 import { useAuth } from "../../utils/authContext";
 
 const StepCounterScreen = () => {
+  // {State Management}
   const [isPedometerAvailable, setIsPedometerAvailable] =
     useState<string>("checking");
   const [pastStepCount, setPastStepCount] = useState<number>(0);
@@ -24,16 +26,17 @@ const StepCounterScreen = () => {
   let subscriptionRef = React.useRef<any>(null);
   const { user } = useAuth();
 
+  // {Start Counting Handler}
   const startCounting = () => {
     setIsCounting(true);
-    // Simpan stepCounted saat ini sebagai base
+    // Save current stepCounted as base
     const baseStepCounted = stepCounted;
     setStepStart(currentStepCount);
     if (subscriptionRef.current) subscriptionRef.current.remove();
     subscriptionRef.current = Pedometer.watchStepCount((result) => {
       setCurrentStepCount(result.steps);
       if (stepStart !== null) {
-        // Tambahkan langkah baru ke stepCounted sebelumnya
+        // Add new steps to previous stepCounted
         setStepCounted(baseStepCounted + (result.steps - stepStart));
       } else {
         setStepCounted(baseStepCounted);
@@ -41,7 +44,7 @@ const StepCounterScreen = () => {
     });
   };
 
-  // Update noteList setelah stopCounting
+  // {Stop Counting Handler}
   const stopCounting = async () => {
     setIsCounting(false);
     if (subscriptionRef.current) {
@@ -51,41 +54,67 @@ const StepCounterScreen = () => {
     if (selectedNoteId) {
       const note = noteList.find((n) => n.id.toString() === selectedNoteId);
       if (note) {
-        // Hitung stepCounted secara langsung agar selalu akurat
+        // Calculate stepCounted directly for accuracy
         const counted = stepStart !== null ? currentStepCount - stepStart : 0;
         await db
           .update(notes)
           .set({ stepCount: counted })
           .where(eq(notes.id, note.id));
-        // Update state agar user lihat hasil terbaru
+        // Update state so user sees latest result
         setStepCounted(counted);
-        alert("Step berhasil disimpan ke note!");
-        await fetchNotes(); // Tunggu update selesai sebelum refresh
+        alert("Steps successfully saved to note!");
+        await fetchNotes(); // Wait for update before refresh
       }
     }
   };
 
-  const resetCounting = () => {
+  // {Reset Counting Handler}
+  const resetCounting = async () => {
     if (isCounting) return;
     if (stepCounted === 0) return;
-    // Konfirmasi sebelum reset
-    if (window.confirm) {
-      if (!window.confirm("Yakin ingin reset langkah?")) return;
-    } else if (global.confirm) {
-      if (!global.confirm("Yakin ingin reset langkah?")) return;
-    } else {
-      if (!confirm("Yakin ingin reset langkah?")) return;
-    }
-    setStepStart(null);
-    setStepCounted(0);
-    setIsCounting(false);
-    if (subscriptionRef.current) {
-      subscriptionRef.current.remove();
-      subscriptionRef.current = null;
-    }
+
+    // Show confirmation dialog before resetting
+    Alert.alert(
+      "Reset Steps",
+      "Are you sure you want to reset the steps for this note?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            if (selectedNoteId) {
+              const note = noteList.find(
+                (n) => n.id.toString() === selectedNoteId
+              );
+              if (note) {
+                await db
+                  .update(notes)
+                  .set({ stepCount: 0 })
+                  .where(eq(notes.id, note.id));
+                await fetchNotes();
+                alert("Note steps have been reset to 0");
+              }
+            }
+
+            // Reset local state
+            setStepStart(null);
+            setStepCounted(0);
+            setIsCounting(false);
+            if (subscriptionRef.current) {
+              subscriptionRef.current.remove();
+              subscriptionRef.current = null;
+            }
+          },
+        },
+      ]
+    );
   };
 
-  // Fetch notes milik user
+  // {Fetch Notes for User}
   const fetchNotes = async () => {
     if (!user) return;
     const allNotes = await db
@@ -106,6 +135,7 @@ const StepCounterScreen = () => {
     }, [user])
   );
 
+  // {Save Steps to Note Handler}
   const handleSaveStepToNote = async () => {
     if (!selectedNote) return;
     await db
@@ -115,9 +145,44 @@ const StepCounterScreen = () => {
     setModalVisible(false);
     setSelectedNote(null);
     setStepCounted(0);
-    alert("Step berhasil disimpan ke note!");
+    alert("Steps successfully saved to note!");
   };
 
+  // Helper: Find note by selectedNoteId
+  const getSelectedNote = () => {
+    return noteList.find((n) => n.id.toString() === selectedNoteId);
+  };
+
+  // Helper: Calculate session steps
+  const getSessionSteps = () => {
+    return stepStart !== null ? Math.max(0, currentStepCount - stepStart) : 0;
+  };
+
+  // Handler: Stop counting and accumulate steps to note
+  const handleStopCounting = async () => {
+    setIsCounting(false);
+    if (subscriptionRef.current) {
+      subscriptionRef.current.remove();
+      subscriptionRef.current = null;
+    }
+    if (selectedNoteId) {
+      const note = getSelectedNote();
+      if (note) {
+        const sessionSteps = getSessionSteps();
+        const newStepCount = (note.stepCount ?? 0) + sessionSteps;
+        await db
+          .update(notes)
+          .set({ stepCount: newStepCount })
+          .where(eq(notes.id, note.id));
+        setStepCounted(newStepCount);
+        alert("Steps successfully accumulated to note!");
+        await fetchNotes();
+      }
+    }
+    setStepStart(null);
+  };
+
+  // {Pedometer Permission and Subscription}
   useEffect(() => {
     let subscription: any;
     const subscribe = async () => {
@@ -156,24 +221,27 @@ const StepCounterScreen = () => {
     };
   }, []);
 
-  // Refresh dropdown stepCount jika noteList berubah
+  // {Update stepCounted when noteList or selectedNoteId changes}
   useEffect(() => {
-    // Jika note yang dipilih ada di noteList, update stepCounted sesuai stepCount note
-    if (selectedNoteId) {
-      const note = noteList.find((n) => n.id.toString() === selectedNoteId);
-      if (note) {
-        setStepCounted(note.stepCount ?? 0);
+    const updateStepCounted = () => {
+      if (selectedNoteId) {
+        const note = getSelectedNote();
+        if (note) {
+          setStepCounted(note.stepCount ?? 0);
+        }
       }
-    }
+    };
+    updateStepCounted();
   }, [noteList, selectedNoteId]);
 
+  // {UI Render}
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="flex-1 items-center justify-center p-6">
         <Text className="text-primary text-2xl font-bold mb-2">
           Step Counter
         </Text>
-        {/* Info Note Steps */}
+        {/* Note Steps Info */}
         <View className="bg-surface rounded-xl p-4 w-full items-center mb-2">
           <Text className="text-primary text-base font-semibold">
             Note Steps
@@ -182,18 +250,16 @@ const StepCounterScreen = () => {
             {stepCounted}
           </Text>
         </View>
-        {/* Info Current Steps */}
+        {/* Current Steps Info */}
         <View className="bg-surface rounded-xl p-4 w-full items-center mb-4">
           <Text className="text-primary text-base font-semibold">
             Current Steps
           </Text>
           <Text className="text-orange text-3xl font-bold mt-1">
-            {isCounting && stepStart !== null
-              ? Math.max(0, currentStepCount - stepStart)
-              : 0}
+            {isCounting && stepStart !== null ? getSessionSteps() : 0}
           </Text>
         </View>
-        {/* Dropdown Pilih Note */}
+        {/* Note Picker Dropdown */}
         <View className="w-full mb-4">
           <Text className="text-primary text-base mb-2">Pick a note</Text>
           <View className="bg-surface rounded-lg border border-accent">
@@ -206,13 +272,14 @@ const StepCounterScreen = () => {
               {noteList.map((note) => (
                 <Picker.Item
                   key={note.id}
-                  label={`${note.title} (${note.stepCount ?? 0} steps)`}
+                  label={note.title}
                   value={note.id.toString()}
                 />
               ))}
             </Picker>
           </View>
         </View>
+        {/* Action Buttons Row */}
         <View className="flex-row gap-4 mt-6 w-full">
           {!isCounting ? (
             <TouchableOpacity
@@ -224,42 +291,17 @@ const StepCounterScreen = () => {
           ) : (
             <TouchableOpacity
               className="flex-1 bg-accent rounded-lg py-3 items-center"
-              onPress={async () => {
-                setIsCounting(false);
-                if (subscriptionRef.current) {
-                  subscriptionRef.current.remove();
-                  subscriptionRef.current = null;
-                }
-                if (selectedNoteId) {
-                  const note = noteList.find(
-                    (n) => n.id.toString() === selectedNoteId
-                  );
-                  if (note) {
-                    // Akumulasi step: note.stepCount sebelumnya + langkah sesi ini
-                    const sessionSteps =
-                      stepStart !== null ? currentStepCount - stepStart : 0;
-                    const newStepCount = (note.stepCount ?? 0) + sessionSteps;
-                    await db
-                      .update(notes)
-                      .set({ stepCount: newStepCount })
-                      .where(eq(notes.id, note.id));
-                    setStepCounted(newStepCount);
-                    alert("Step berhasil diakumulasikan ke note!");
-                    await fetchNotes();
-                  }
-                }
-                setStepStart(null);
-              }}
+              onPress={handleStopCounting}
             >
               <Text className="text-white text-base font-bold">Stop</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity
             className={`flex-1 bg-surface rounded-lg py-3 items-center border border-accent ml-2 ${
-              isCounting ? "" : "opacity-50"
+              isCounting || stepCounted === 0 ? "opacity-50" : ""
             }`}
             onPress={resetCounting}
-            disabled={!isCounting}
+            disabled={isCounting || stepCounted === 0}
           >
             <Text className="text-accent text-base font-bold">Reset</Text>
           </TouchableOpacity>
