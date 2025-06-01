@@ -2,7 +2,7 @@ import { Redirect, Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import "./global.css";
-import { AuthProvider, useAuth } from "./utils/auth-context";
+import { AuthProvider, useAuth } from "./utils/authContext";
 
 export default function RootLayout() {
   return (

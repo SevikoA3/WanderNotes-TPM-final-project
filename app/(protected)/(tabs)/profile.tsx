@@ -4,7 +4,7 @@ import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import UserAvatar from "../../components/UserAvatar";
-import { useAuth } from "../../utils/auth-context";
+import { useAuth } from "../../utils/authContext";
 
 // Notes for usage:
 // 1. Icons: Uses phosphor-react-native. Ensure it's installed.

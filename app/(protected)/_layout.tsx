@@ -2,7 +2,7 @@ import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Platform } from "react-native";
-import { useAuth } from "../utils/auth-context";
+import { useAuth } from "../utils/authContext";
 
 // Set notification handler (agar notifikasi muncul di foreground)
 Notifications.setNotificationHandler({

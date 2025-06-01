@@ -39,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
     if (userRow.password !== hash) return false;
     const { password: _, ...safeUserData } = userRow;
+    // @ts-ignore
     setUser(safeUserData);
     return true;
   };

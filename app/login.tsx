@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "./utils/auth-context";
+import { useAuth } from "./utils/authContext";
 
 export default function LoginScreen() {
   const [username, setUsername] = useState("");

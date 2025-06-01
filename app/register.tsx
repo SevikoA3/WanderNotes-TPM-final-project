@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import db, { eq } from "./db/db";
 import { users } from "./db/schema";
-import { useAuth } from "./utils/auth-context";
+import { useAuth } from "./utils/authContext";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");

@@ -1,6 +1,6 @@
 import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
-import { Bell, Envelope, Fingerprint, Key, Trash } from "phosphor-react-native";
+import { Fingerprint, Key, Trash } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -15,7 +15,7 @@ import {
 import UserAvatar from "../../components/UserAvatar";
 import db, { eq } from "../../db/db";
 import { users } from "../../db/schema";
-import { useAuth } from "../../utils/auth-context";
+import { useAuth } from "../../utils/authContext";
 
 const SettingsScreen = () => {
   const router = useRouter();
