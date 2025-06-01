@@ -18,14 +18,14 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ImagePickerField from "../components/ImagePickerField";
-import LocationPickerField from "../components/LocationPickerField";
-import ReminderList from "../components/ReminderList";
-import db, { eq } from "../db/db";
-import { notes, reminders } from "../db/schema";
-import { locationEventEmitter } from "../services/locationEvents";
-import { copyImageToAppDir } from "../utils/image";
-import { reverseGeocode } from "../utils/location";
+import ImagePickerField from "../../components/ImagePickerField";
+import LocationPickerField from "../../components/LocationPickerField";
+import ReminderList from "../../components/ReminderList";
+import db, { eq } from "../../db/db";
+import { notes, reminders } from "../../db/schema";
+import { locationEventEmitter } from "../../services/locationEvents";
+import { copyImageToAppDir } from "../../utils/image";
+import { reverseGeocode } from "../../utils/location";
 
 const EditNote = () => {
   const router = useRouter();
@@ -264,7 +264,7 @@ const EditNote = () => {
           try {
             await db.delete(notes).where(eq(notes.id, Number(id)));
             Alert.alert("Deleted", "Note deleted.", [
-              { text: "OK", onPress: () => router.replace("/(tabs)/home") },
+              { text: "OK", onPress: () => router.replace("./(tabs)/home") },
             ]);
           } catch (err) {
             Alert.alert("Error", "Failed to delete note.");

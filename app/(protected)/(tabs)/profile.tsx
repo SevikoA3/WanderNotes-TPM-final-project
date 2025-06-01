@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../utils/auth-context";
 
 // Notes for usage:
 // 1. Icons: Uses phosphor-react-native. Ensure it's installed.
@@ -17,15 +18,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const ProfileScreen = () => {
   const router = useRouter();
+  const { logout } = useAuth();
 
   const handleNavigateToSettings = () => {
     router.push("/pages/settings"); // Navigate to settings screen
   };
 
-  const handleLogout = () => {
-    // Implement logout logic here
-    console.log("Logout pressed");
-    // Example: router.replace('/login');
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
   };
 
   const handleFeedback = () => {

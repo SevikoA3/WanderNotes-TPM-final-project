@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { locationEventEmitter } from "../services/locationEvents";
+import { locationEventEmitter } from "../../services/locationEvents";
 
 interface LatLng {
   latitude: number;
@@ -95,7 +95,8 @@ export default function SelectLocationModal() {
         )}
         <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-light">
           <Text className="text-primary text-base mb-2 text-center">
-            Lat: {selectedMarkerLocation.latitude.toFixed(6)}, Lng: {selectedMarkerLocation.longitude.toFixed(6)}
+            Lat: {selectedMarkerLocation.latitude.toFixed(6)}, Lng:{" "}
+            {selectedMarkerLocation.longitude.toFixed(6)}
           </Text>
           <TouchableOpacity
             className="w-full h-14 rounded-2xl bg-orange-dark items-center justify-center"

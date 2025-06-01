@@ -15,9 +15,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ReminderList from "../components/ReminderList";
-import db from "../db/db";
-import { notes, reminders } from "../db/schema";
+import ReminderList from "../../components/ReminderList";
+import db from "../../db/db";
+import { notes, reminders } from "../../db/schema";
 
 type Note = {
   id: number;

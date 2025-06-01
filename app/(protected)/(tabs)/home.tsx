@@ -11,9 +11,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import NoteCard from "../components/NoteCard";
-import db from "../db/db";
-import { notes } from "../db/schema";
+import NoteCard from "../../components/NoteCard";
+import db from "../../db/db";
+import { notes } from "../../db/schema";
 
 type Note = {
   id: number;

@@ -17,14 +17,14 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ImagePickerField from "../components/ImagePickerField";
-import LocationPickerField from "../components/LocationPickerField";
-import ReminderList from "../components/ReminderList";
-import db from "../db/db";
-import { notes, reminders } from "../db/schema";
-import { locationEventEmitter } from "../services/locationEvents";
-import { copyImageToAppDir } from "../utils/image";
-import { reverseGeocode } from "../utils/location";
+import ImagePickerField from "../../components/ImagePickerField";
+import LocationPickerField from "../../components/LocationPickerField";
+import ReminderList from "../../components/ReminderList";
+import db from "../../db/db";
+import { notes, reminders } from "../../db/schema";
+import { locationEventEmitter } from "../../services/locationEvents";
+import { copyImageToAppDir } from "../../utils/image";
+import { reverseGeocode } from "../../utils/location";
 
 export default function AddNewScreen() {
   const router = useRouter();
