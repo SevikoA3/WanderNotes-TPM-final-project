@@ -1,5 +1,6 @@
 import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
+import { Eye, EyeSlash } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -18,6 +19,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
@@ -112,22 +115,46 @@ export default function RegisterPage() {
             autoCapitalize="none"
             placeholderTextColor="#a97c5a"
           />
-          <TextInput
-            className="bg-surface rounded-xl p-4 mb-4 w-full text-base text-primary border-none"
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#a97c5a"
-          />
-          <TextInput
-            className="bg-surface rounded-xl p-4 mb-6 w-full text-base text-primary border-none"
-            placeholder="Repeat Password"
-            value={password2}
-            onChangeText={setPassword2}
-            secureTextEntry
-            placeholderTextColor="#a97c5a"
-          />
+          <View className="w-full mb-4 relative">
+            <TextInput
+              className="bg-surface rounded-xl p-4 w-full text-base text-primary border-none pr-12"
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholderTextColor="#a97c5a"
+            />
+            <TouchableOpacity
+              className="absolute right-4 top-1/2 -translate-y-1/2"
+              onPress={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? (
+                <Eye size={24} color="#a97c5a" />
+              ) : (
+                <EyeSlash size={24} color="#a97c5a" />
+              )}
+            </TouchableOpacity>
+          </View>
+          <View className="w-full mb-6 relative">
+            <TextInput
+              className="bg-surface rounded-xl p-4 w-full text-base text-primary border-none pr-12"
+              placeholder="Repeat Password"
+              value={password2}
+              onChangeText={setPassword2}
+              secureTextEntry={!showPassword2}
+              placeholderTextColor="#a97c5a"
+            />
+            <TouchableOpacity
+              className="absolute right-4 top-1/2 -translate-y-1/2"
+              onPress={() => setShowPassword2((v) => !v)}
+            >
+              {showPassword2 ? (
+                <Eye size={24} color="#a97c5a" />
+              ) : (
+                <EyeSlash size={24} color="#a97c5a" />
+              )}
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
             className="bg-orange-light py-4 rounded-full w-full mb-2 shadow-md"
             onPress={handleRegister}

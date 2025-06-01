@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { Eye, EyeSlash } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -14,6 +15,7 @@ export default function LoginScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -78,14 +80,26 @@ export default function LoginScreen() {
             autoCapitalize="none"
             placeholderTextColor="#a97c5a"
           />
-          <TextInput
-            className="bg-surface rounded-xl p-4 mb-6 w-full text-base text-primary border-none"
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#a97c5a"
-          />
+          <View className="w-full mb-6 relative">
+            <TextInput
+              className="bg-surface rounded-xl p-4 w-full text-base text-primary border-none pr-12"
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholderTextColor="#a97c5a"
+            />
+            <TouchableOpacity
+              className="absolute right-4 top-1/2 -translate-y-1/2"
+              onPress={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? (
+                <Eye size={24} color="#a97c5a" />
+              ) : (
+                <EyeSlash size={24} color="#a97c5a" />
+              )}
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
             className="bg-orange-light py-4 rounded-full w-full mb-2 shadow-md"
             onPress={handleLogin}

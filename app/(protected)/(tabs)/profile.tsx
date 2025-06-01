@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { ArrowLeft, Gear, Megaphone, X } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
+import { ArrowLeft, Gear, Megaphone } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -60,17 +60,6 @@ const ProfileScreen = () => {
     console.log("Feedback pressed");
   };
 
-  // Placeholder for back navigation if this screen were part of a stack directly
-  // For a tab, the X might close a modal or navigate to a different part of the app.
-  // Here, it's more of a placeholder from the design.
-  const handleClose = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.push("/home"); // Fallback to home if no back history
-    }
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="flex-1 justify-between">
@@ -78,13 +67,7 @@ const ProfileScreen = () => {
         <ScrollView>
           {/* Header */}
           <View className="flex-row items-center bg-background p-4 pb-2 justify-between">
-            <TouchableOpacity
-              onPress={handleClose}
-              className="flex size-12 shrink-0 items-center justify-center text-primary"
-            >
-              <X size={24} color="#1b130d" />
-            </TouchableOpacity>
-            <Text className="text-primary text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">
+            <Text className="text-primary text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
               Profile
             </Text>
           </View>

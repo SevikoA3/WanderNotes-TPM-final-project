@@ -2,7 +2,6 @@ import * as Crypto from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
-  Fingerprint,
   Image as ImageIcon,
   Key,
   Trash,
@@ -14,7 +13,6 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -37,8 +35,6 @@ const SettingsScreen = () => {
   const { user } = useAuth();
 
   const [userData, setUserData] = useState<UserData | null>(user);
-  const [isFingerprintLoginEnabled, setIsFingerprintLoginEnabled] =
-    useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -48,9 +44,6 @@ const SettingsScreen = () => {
   const [newUsername, setNewUsername] = useState("");
   const [showChangeProfilePic, setShowChangeProfilePic] = useState(false);
   const [newProfilePic, setNewProfilePic] = useState<string | null>(null);
-
-  const toggleFingerprint = () =>
-    setIsFingerprintLoginEnabled((previousState) => !previousState);
 
   // Fetch latest user data from DB
   const fetchUserData = async () => {
@@ -450,29 +443,6 @@ const SettingsScreen = () => {
             </Text>
           </View>
         </TouchableOpacity>
-
-        {/* Security Section */}
-        <Text className="text-primary text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
-          Security
-        </Text>
-        <View className="flex-row items-center gap-4 bg-background px-4 min-h-14 justify-between">
-          <View className="flex-row items-center gap-4">
-            <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
-              <Fingerprint size={24} color="#1b130d" />
-            </View>
-            <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
-              Fingerprint Login
-            </Text>
-          </View>
-          <Switch
-            trackColor={{ false: "#f3ece7", true: "#ed782a" }}
-            thumbColor={isFingerprintLoginEnabled ? "#fcfaf8" : "#fcfaf8"}
-            ios_backgroundColor="#f3ece7"
-            onValueChange={toggleFingerprint}
-            value={isFingerprintLoginEnabled}
-            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
-          />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
