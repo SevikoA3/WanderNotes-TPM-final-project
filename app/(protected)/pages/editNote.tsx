@@ -26,7 +26,7 @@ import { notes, reminders } from "../../db/schema";
 import { locationEventEmitter } from "../../services/locationEvents";
 import { useAuth } from "../../utils/authContext";
 import { copyImageToAppDir } from "../../utils/image";
-import { reverseGeocode } from "../../utils/location";
+import { getTimezoneFromCoords, reverseGeocode } from "../../utils/location";
 
 const EditNote = () => {
   const router = useRouter();
@@ -55,6 +55,7 @@ const EditNote = () => {
   const [createdAt, setCreatedAt] = useState<string>("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState(new Date());
+  const [timezone, setTimezone] = useState<string>("Asia/Jakarta");
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -256,6 +257,7 @@ const EditNote = () => {
           latitude: latitude,
           longitude: longitude,
           address: address,
+          createdTimezone: timezone, // Ganti ke field yang benar
         })
         .where(eq(notes.id, Number(id)));
       Alert.alert("Success", "Note updated.", [
@@ -388,6 +390,18 @@ const EditNote = () => {
       }
     }
   };
+
+  // Update timezone otomatis saat lokasi berubah
+  useEffect(() => {
+    if (latitude !== null && longitude !== null) {
+      try {
+        const tz = getTimezoneFromCoords(latitude, longitude);
+        setTimezone(tz);
+      } catch {
+        setTimezone("Asia/Jakarta");
+      }
+    }
+  }, [latitude, longitude]);
 
   if (loading) {
     return (

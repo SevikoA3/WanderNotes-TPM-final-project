@@ -14,22 +14,7 @@ import {
 import db, { eq } from "./db/db";
 import { users } from "./db/schema";
 import { useAuth } from "./utils/authContext";
-
-// List timezone populer (bisa diperluas)
-const TIMEZONES = [
-  "Asia/Jakarta",
-  "Asia/Makassar",
-  "Asia/Jayapura",
-  "Asia/Singapore",
-  "Asia/Bangkok",
-  "Asia/Tokyo",
-  "Asia/Shanghai",
-  "Europe/London",
-  "Europe/Paris",
-  "America/New_York",
-  "America/Los_Angeles",
-  "Australia/Sydney",
-];
+import { getAllTimezones } from "./utils/location";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -38,7 +23,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
-  const [timezone, setTimezone] = useState("Asia/Jakarta");
+  const [timezone, setTimezone] = useState<string>("Asia/Jakarta");
+  const [allTimezones] = useState<string[]>(getAllTimezones());
   const { login } = useAuth();
   const router = useRouter();
 
@@ -182,7 +168,7 @@ export default function RegisterPage() {
                 onValueChange={setTimezone}
                 style={{ width: "100%", color: "#1b130d" }}
               >
-                {TIMEZONES.map((tz) => (
+                {allTimezones.map((tz) => (
                   <Picker.Item key={tz} label={tz} value={tz} />
                 ))}
               </Picker>

@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Bell } from "phosphor-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -25,7 +25,7 @@ import { notes, reminders } from "../../db/schema";
 import { locationEventEmitter } from "../../services/locationEvents";
 import { useAuth } from "../../utils/authContext";
 import { copyImageToAppDir } from "../../utils/image";
-import { reverseGeocode } from "../../utils/location";
+import { getTimezoneFromCoords, reverseGeocode } from "../../utils/location";
 
 export default function AddNewScreen() {
   const router = useRouter();
@@ -45,9 +45,10 @@ export default function AddNewScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState<Date>(new Date());
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [timezone, setTimezone] = useState<string>("Asia/Jakarta");
 
   // Ambil lokasi saat ini saat komponen mount
-  React.useEffect(() => {
+  useEffect(() => {
     const getLocation = async () => {
       setLocLoading(true);
       try {
@@ -84,7 +85,7 @@ export default function AddNewScreen() {
   }, []);
 
   // Update location if returned from selectLocation
-  React.useEffect(() => {
+  useEffect(() => {
     const lat = Number(params.selectedLatitude);
     const lng = Number(params.selectedLongitude);
     if (
@@ -101,7 +102,7 @@ export default function AddNewScreen() {
   }, [params.selectedLatitude, params.selectedLongitude]);
 
   // Reverse geocoding setiap kali location berubah
-  React.useEffect(() => {
+  useEffect(() => {
     const getAddress = async () => {
       if (location) {
         setAddress(await reverseGeocode(location));
@@ -113,7 +114,7 @@ export default function AddNewScreen() {
   }, [location]);
 
   // Listen for locationSelected event from locationEventEmitter
-  React.useEffect(() => {
+  useEffect(() => {
     // @ts-ignore: event name is dynamic
     const sub = locationEventEmitter.addListener(
       // @ts-ignore
@@ -124,6 +125,24 @@ export default function AddNewScreen() {
     );
     return () => sub.remove();
   }, []);
+
+  // Update timezone otomatis saat location berubah
+  useEffect(() => {
+    if (location && location.latitude && location.longitude) {
+      (async () => {
+        try {
+          // Pastikan getTimezoneFromCoords bisa async jika perlu (misal pakai API)
+          const tz = await getTimezoneFromCoords(
+            location.latitude,
+            location.longitude
+          );
+          setTimezone(tz);
+        } catch {
+          setTimezone("Asia/Jakarta");
+        }
+      })();
+    }
+  }, [location?.latitude, location?.longitude]);
 
   // Pick image and save to local file system
   const pickImage = async () => {
@@ -206,7 +225,7 @@ export default function AddNewScreen() {
         longitude: location.longitude,
         address,
         createdAt: new Date().toISOString(),
-        createdTimezone: user.timezone || "UTC", // simpan timezone saat pembuatan
+        createdTimezone: timezone, // gunakan timezone hasil lookup
       });
       // Ambil id note yang baru
       const lastNote = await db

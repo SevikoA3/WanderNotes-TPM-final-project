@@ -24,6 +24,7 @@ import UserAvatar from "../../components/UserAvatar";
 import db, { eq } from "../../db/db";
 import { users } from "../../db/schema";
 import { useAuth } from "../../utils/authContext";
+import { getAllTimezones } from "../../utils/location";
 
 type UserData = {
   id: number;
@@ -31,21 +32,6 @@ type UserData = {
   createdAt: string;
   profileImage: string | null;
 };
-
-const TIMEZONES = [
-  "Asia/Jakarta",
-  "Asia/Makassar",
-  "Asia/Jayapura",
-  "Asia/Singapore",
-  "Asia/Bangkok",
-  "Asia/Tokyo",
-  "Asia/Shanghai",
-  "Europe/London",
-  "Europe/Paris",
-  "America/New_York",
-  "America/Los_Angeles",
-  "Australia/Sydney",
-];
 
 const SettingsScreen = () => {
   const router = useRouter();
@@ -62,9 +48,10 @@ const SettingsScreen = () => {
   const [showChangeProfilePic, setShowChangeProfilePic] = useState(false);
   const [newProfilePic, setNewProfilePic] = useState<string | null>(null);
   const [showChangeTimezone, setShowChangeTimezone] = useState(false);
-  const [newTimezone, setNewTimezone] = useState<string>(
+  const [timezone, setTimezone] = useState<string>(
     user?.timezone || "Asia/Jakarta"
   );
+  const [allTimezones] = useState<string[]>(getAllTimezones());
 
   // Fetch latest user data from DB
   const fetchUserData = async () => {
@@ -231,7 +218,7 @@ const SettingsScreen = () => {
     try {
       await db
         .update(users)
-        .set({ timezone: newTimezone })
+        .set({ timezone: timezone })
         .where(eq(users.id, user.id))
         .run();
       Alert.alert("Success", "Timezone updated!");
@@ -468,16 +455,19 @@ const SettingsScreen = () => {
         </TouchableOpacity>
         {showChangeTimezone && (
           <View className="px-4 pb-4">
-            <View className="bg-surface rounded-lg border border-accent mb-2">
-              <Picker
-                selectedValue={newTimezone}
-                onValueChange={setNewTimezone}
-                style={{ width: "100%", color: "#1b130d" }}
-              >
-                {TIMEZONES.map((tz) => (
-                  <Picker.Item key={tz} label={tz} value={tz} />
-                ))}
-              </Picker>
+            <View className="w-full mb-4">
+              <Text className="text-primary mb-2">Timezone</Text>
+              <View className="bg-surface rounded-lg border border-accent">
+                <Picker
+                  selectedValue={timezone}
+                  onValueChange={setTimezone}
+                  style={{ width: "100%", color: "#1b130d" }}
+                >
+                  {allTimezones.map((tz) => (
+                    <Picker.Item key={tz} label={tz} value={tz} />
+                  ))}
+                </Picker>
+              </View>
             </View>
             <TouchableOpacity
               className="bg-orange-light py-3 rounded-full w-full mb-2 shadow-md"
