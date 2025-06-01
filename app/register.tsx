@@ -22,11 +22,31 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!username.trim() || !password.trim() || !password2.trim()) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+    const trimmedPassword2 = password2.trim();
+
+    if (!trimmedUsername || !trimmedPassword || !trimmedPassword2) {
       Alert.alert("Error", "All fields are required.");
       return;
     }
-    if (password !== password2) {
+    if (/\s/.test(trimmedUsername)) {
+      Alert.alert("Error", "Username cannot contain spaces.");
+      return;
+    }
+    if (/\s/.test(trimmedPassword)) {
+      Alert.alert("Error", "Password cannot contain spaces.");
+      return;
+    }
+    if (trimmedUsername.length < 3) {
+      Alert.alert("Error", "Username must be at least 3 characters.");
+      return;
+    }
+    if (trimmedPassword.length < 8) {
+      Alert.alert("Error", "Password must be at least 8 characters.");
+      return;
+    }
+    if (trimmedPassword !== trimmedPassword2) {
       Alert.alert("Error", "Passwords do not match.");
       return;
     }
@@ -35,13 +55,13 @@ export default function RegisterPage() {
       // Hash password
       const hash = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
-        password
+        trimmedPassword
       );
       // Check if username exists
       const existing = await db
         .select()
         .from(users)
-        .where(eq(users.username, username))
+        .where(eq(users.username, trimmedUsername))
         .get();
       if (existing) {
         Alert.alert("Error", "Username already exists.");
@@ -50,12 +70,12 @@ export default function RegisterPage() {
       }
       // Insert user
       await db.insert(users).values({
-        username,
+        username: trimmedUsername,
         password: hash,
         createdAt: new Date().toISOString(),
       });
       // Simpan session pakai context
-      await login(username, password);
+      await login(trimmedUsername, trimmedPassword);
       Alert.alert("Success", "Registration successful!", [
         {
           text: "OK",

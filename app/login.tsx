@@ -18,14 +18,25 @@ export default function LoginScreen() {
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
       Alert.alert("Error", "Username and password are required.");
+      return;
+    }
+    if (/\s/.test(trimmedUsername)) {
+      Alert.alert("Error", "Username cannot contain spaces.");
+      return;
+    }
+    if (/\s/.test(trimmedPassword)) {
+      Alert.alert("Error", "Password cannot contain spaces.");
       return;
     }
     setLoading(true);
     try {
       // Only use context login, which handles hashing and DB check
-      const success = await login(username, password);
+      const success = await login(trimmedUsername, trimmedPassword);
       if (!success) {
         Alert.alert("Error", "Invalid username or password.");
         setLoading(false);
