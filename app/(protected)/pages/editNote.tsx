@@ -24,14 +24,17 @@ import ReminderList from "../../components/ReminderList";
 import db, { eq } from "../../db/db";
 import { notes, reminders } from "../../db/schema";
 import { locationEventEmitter } from "../../services/locationEvents";
+import { useAuth } from "../../utils/authContext";
 import { copyImageToAppDir } from "../../utils/image";
 import { reverseGeocode } from "../../utils/location";
 
 const EditNote = () => {
   const router = useRouter();
+  const { user } = useAuth(); // <--- Ambil user dari context
   const { id } = useLocalSearchParams();
   const [note, setNote] = useState<{
     id: number;
+    userId: number; // <--- Tambah userId ke tipe note
     imagePath: string;
     title: string;
     description: string;
@@ -63,6 +66,14 @@ const EditNote = () => {
           .where(eq(notes.id, Number(id)))
           .get();
         if (result) {
+          if (!user || result.userId !== user.id) {
+            setNote(null);
+            setLoading(false);
+            Alert.alert("Forbidden", "You are not allowed to edit this note.", [
+              { text: "OK", onPress: () => router.replace("./(tabs)/home") },
+            ]);
+            return;
+          }
           setNote(result);
           setTitle(result.title);
           setDescription(result.description);
@@ -78,7 +89,7 @@ const EditNote = () => {
       }
     };
     if (id) fetchNote();
-  }, [id]);
+  }, [id, user]);
 
   // Handle location returned from selectLocation
   const params = useLocalSearchParams();
@@ -230,6 +241,10 @@ const EditNote = () => {
   };
 
   const handleSave = async () => {
+    if (!user || (note && note.userId !== user.id)) {
+      Alert.alert("Forbidden", "You are not allowed to edit this note.");
+      return;
+    }
     setSaving(true);
     try {
       await db
@@ -254,6 +269,10 @@ const EditNote = () => {
   };
 
   const handleDelete = async () => {
+    if (!user || (note && note.userId !== user.id)) {
+      Alert.alert("Forbidden", "You are not allowed to delete this note.");
+      return;
+    }
     Alert.alert("Delete Note", "Are you sure you want to delete this note?", [
       { text: "Cancel", style: "cancel" },
       {

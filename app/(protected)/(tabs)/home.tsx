@@ -12,8 +12,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import NoteCard from "../../components/NoteCard";
-import db from "../../db/db";
+import db, { eq } from "../../db/db";
 import { notes } from "../../db/schema";
+import { useAuth } from "../../utils/authContext";
 
 type Note = {
   id: number;
@@ -24,6 +25,7 @@ type Note = {
 
 const HomeScreen = () => {
   const router = useRouter();
+  const { user } = useAuth(); // <--- Ambil user dari context
   const [noteList, setNoteList] = useState<Note[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,12 @@ const HomeScreen = () => {
       const fetchNotes = async () => {
         setLoading(true);
         try {
-          const allNotes = await db.select().from(notes).all();
+          if (!user) return;
+          const allNotes = await db
+            .select()
+            .from(notes)
+            .where(eq(notes.userId, user.id)) // <--- Filter by userId
+            .all();
           if (isActive) setNoteList(allNotes);
         } catch (err) {
           console.error("Failed to fetch notes:", err);
@@ -46,7 +53,7 @@ const HomeScreen = () => {
       return () => {
         isActive = false;
       };
-    }, [])
+    }, [user]) // <--- Tambah user ke dependency
   );
 
   // Filter notes by search

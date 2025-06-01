@@ -23,11 +23,13 @@ import ReminderList from "../../components/ReminderList";
 import db from "../../db/db";
 import { notes, reminders } from "../../db/schema";
 import { locationEventEmitter } from "../../services/locationEvents";
+import { useAuth } from "../../utils/authContext";
 import { copyImageToAppDir } from "../../utils/image";
 import { reverseGeocode } from "../../utils/location";
 
 export default function AddNewScreen() {
   const router = useRouter();
+  const { user } = useAuth(); // <--- Ambil user dari context
   const params = useLocalSearchParams();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -166,6 +168,10 @@ export default function AddNewScreen() {
 
   // Save note to DB
   const handleSave = async () => {
+    if (!user) {
+      Alert.alert("Error", "User not found. Please login again.");
+      return;
+    }
     // Request notification permission
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== "granted") {
@@ -192,6 +198,7 @@ export default function AddNewScreen() {
     try {
       // Simpan note
       await db.insert(notes).values({
+        userId: user.id, // <--- Simpan userId
         title,
         description,
         imagePath: image,
