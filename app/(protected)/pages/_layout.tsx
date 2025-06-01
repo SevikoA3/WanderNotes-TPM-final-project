@@ -58,6 +58,46 @@ export default function componentsLayout() {
           options={{
             title: "",
             headerShown: true,
+            headerStyle: {
+              backgroundColor: "#fcfaf8", // Use Tailwind config color
+            },
+            headerTitleStyle: {
+              color: "#1b130d", // Use Tailwind config color
+              fontSize: 24, // Header title font size
+              fontWeight: "bold", // Header title font weight
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="kesanPesan"
+          options={{
+            title: "Impression & Messages",
+            headerShown: true,
+            headerStyle: {
+              backgroundColor: "#fcfaf8",
+            },
+            headerTitleStyle: {
+              color: "#1b130d",
+              fontSize: 24,
+              fontWeight: "bold",
+            },
+          }}
+        />
+
+        <Stack.Screen
+          name="editNote"
+          options={{
+            title: "Edit Note",
+            headerShown: true,
+            headerStyle: {
+              backgroundColor: "#fcfaf8",
+            },
+            headerTitleStyle: {
+              color: "#1b130d",
+              fontSize: 24,
+              fontWeight: "bold",
+            },
           }}
         />
       </Stack>

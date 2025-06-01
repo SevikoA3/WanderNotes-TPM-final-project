@@ -55,9 +55,8 @@ const ProfileScreen = () => {
     router.replace("/login");
   };
 
-  const handleFeedback = () => {
-    // Implement feedback logic here
-    console.log("Feedback pressed");
+  const handleKesanPesan = () => {
+    router.push("/pages/kesanPesan");
   };
 
   return (
@@ -117,13 +116,13 @@ const ProfileScreen = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleFeedback}>
+          <TouchableOpacity onPress={handleKesanPesan}>
             <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Megaphone size={24} color="#1b130d" />
               </View>
               <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
-                Feedback
+                Impressions & Messages
               </Text>
             </View>
           </TouchableOpacity>

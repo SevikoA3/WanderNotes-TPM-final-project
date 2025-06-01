@@ -39,6 +39,12 @@ export default function TabLayout() {
           paddingBottom: 10, // Add padding for labels
         },
         tabBarShowLabel: true, // Use default label only
+        // Add consistent label style for all tabs
+        tabBarLabelStyle: {
+          color: "#1b130d",
+          fontSize: 14,
+          fontWeight: "bold",
+        },
       }}
     >
       <Tabs.Screen

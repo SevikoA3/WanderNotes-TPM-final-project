@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Bell } from "phosphor-react-native";
+import { Bell } from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -422,16 +422,6 @@ const EditNote = () => {
   return (
     <KeyboardAvoidingView className="flex-1" behavior={"padding"}>
       <SafeAreaView className="flex-1 bg-background-light" edges={["top"]}>
-        {/* Header with Back Button */}
-        <View className="flex-row items-center p-4 pb-2 bg-background-light">
-          <TouchableOpacity onPress={() => router.back()} className="mr-4 p-2">
-            <ArrowLeft size={24} color="#9a6b4c" />
-          </TouchableOpacity>
-          <Text className="text-primary text-xl font-bold flex-1 text-center">
-            Edit Note
-          </Text>
-          <View style={{ width: 48 }} />
-        </View>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
             className="flex-1"
