@@ -1,7 +1,6 @@
-import { useFocusEffect } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Fingerprint,
   Image as ImageIcon,
@@ -227,7 +226,7 @@ const SettingsScreen = () => {
 
   async function pickImage() {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,

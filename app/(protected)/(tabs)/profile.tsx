@@ -1,5 +1,4 @@
-import { useFocusEffect } from "@react-navigation/native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft, Gear, Megaphone, X } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
