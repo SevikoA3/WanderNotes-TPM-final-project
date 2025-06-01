@@ -273,11 +273,13 @@ export default function AddNewScreen() {
             keyboardShouldPersistTaps="handled"
           >
             {/* Image Upload Area */}
-            <ImagePickerField
-              image={image}
-              onPick={pickImage}
-              editable={!saving}
-            />
+            <View className="px-4">
+              <ImagePickerField
+                image={image}
+                onPick={pickImage}
+                editable={!saving}
+              />
+            </View>
             {/* Title Input */}
             <View className="px-4 pt-2">
               <TextInput

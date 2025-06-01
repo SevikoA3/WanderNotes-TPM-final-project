@@ -15,6 +15,7 @@ export const notes = sqliteTable("notes", {
   createdAt: text("created_at").notNull(),
   reminderAt: text("reminder_at"),
   isReminderSet: integer("is_reminder_set", { mode: "boolean" }).default(false),
+  stepCount: integer("step_count").default(0),
 });
 
 // Reminders table

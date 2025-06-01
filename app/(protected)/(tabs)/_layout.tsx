@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { House, Money, User as UserIcon } from "phosphor-react-native";
+import { House, Money, Person, User as UserIcon } from "phosphor-react-native";
 import React from "react";
 import { View } from "react-native";
 
@@ -56,6 +56,15 @@ export default function TabLayout() {
           title: "Currency",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon icon={Money} color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="pedometer"
+        options={{
+          title: "Steps",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon icon={Person} color={color} focused={focused} />
           ),
         }}
       />

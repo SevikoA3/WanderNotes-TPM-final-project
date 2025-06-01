@@ -66,6 +66,12 @@
           "enableBackgroundRemoteNotifications": false
         }
       ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow $(PRODUCT_NAME) to access your device motion"
+        }
+      ],
       "expo-sqlite",
       "expo-maps"
     ],

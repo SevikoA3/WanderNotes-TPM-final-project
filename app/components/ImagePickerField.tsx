@@ -18,7 +18,7 @@ const ImagePickerField: React.FC<ImagePickerFieldProps> = ({
 }) => {
   return (
     <TouchableOpacity
-      className="w-full aspect-[16/9] mb-4 px-4 rounded-xl overflow-hidden"
+      className="w-full aspect-[16/9] mb-4 rounded-xl overflow-hidden"
       activeOpacity={0.8}
       onPress={onPick}
       disabled={!editable}

@@ -1,0 +1,1 @@
+ALTER TABLE `notes` ADD `step_count` integer DEFAULT 0;

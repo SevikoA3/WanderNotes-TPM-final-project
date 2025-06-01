@@ -25,6 +25,7 @@ type Note = {
   title: string;
   description: string;
   address: string | null;
+  stepCount?: number;
 };
 
 const ViewNoteScreen = () => {
@@ -47,7 +48,18 @@ const ViewNoteScreen = () => {
           .from(notes)
           .where(eq(notes.id, noteId))
           .get();
-        setNote(result || null);
+        if (result) {
+          setNote({
+            id: result.id,
+            imagePath: result.imagePath,
+            title: result.title,
+            description: result.description,
+            address: result.address,
+            stepCount: result.stepCount ?? 0,
+          });
+        } else {
+          setNote(null);
+        }
         // Fetch reminders and createdAt after note is loaded
         const reminderRows = await db
           .select()
@@ -123,6 +135,10 @@ const ViewNoteScreen = () => {
           {note.address ? (
             <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text>
           ) : null}
+          {/* Step Count */}
+          <Text className="text-accent text-base mx-4 mb-2">
+            Steps: {note.stepCount ?? 0}
+          </Text>
           <Text className="text-primary text-base leading-relaxed m-4">
             {note.description}
           </Text>
