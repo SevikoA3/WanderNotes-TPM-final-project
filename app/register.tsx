@@ -1,3 +1,4 @@
+import { Picker } from "@react-native-picker/picker";
 import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
 import { Eye, EyeSlash } from "phosphor-react-native";
@@ -14,6 +15,22 @@ import db, { eq } from "./db/db";
 import { users } from "./db/schema";
 import { useAuth } from "./utils/authContext";
 
+// List timezone populer (bisa diperluas)
+const TIMEZONES = [
+  "Asia/Jakarta",
+  "Asia/Makassar",
+  "Asia/Jayapura",
+  "Asia/Singapore",
+  "Asia/Bangkok",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Europe/London",
+  "Europe/Paris",
+  "America/New_York",
+  "America/Los_Angeles",
+  "Australia/Sydney",
+];
+
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +38,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
+  const [timezone, setTimezone] = useState("Asia/Jakarta");
   const { login } = useAuth();
   const router = useRouter();
 
@@ -76,6 +94,7 @@ export default function RegisterPage() {
         username: trimmedUsername,
         password: hash,
         createdAt: new Date().toISOString(),
+        timezone, // simpan timezone
       });
       // Simpan session pakai context
       await login(trimmedUsername, trimmedPassword);
@@ -154,6 +173,20 @@ export default function RegisterPage() {
                 <EyeSlash size={24} color="#a97c5a" />
               )}
             </TouchableOpacity>
+          </View>
+          <View className="w-full mb-4">
+            <Text className="text-primary mb-2">Timezone</Text>
+            <View className="bg-surface rounded-lg border border-accent">
+              <Picker
+                selectedValue={timezone}
+                onValueChange={setTimezone}
+                style={{ width: "100%", color: "#1b130d" }}
+              >
+                {TIMEZONES.map((tz) => (
+                  <Picker.Item key={tz} label={tz} value={tz} />
+                ))}
+              </Picker>
+            </View>
           </View>
           <TouchableOpacity
             className="bg-orange-light py-4 rounded-full w-full mb-2 shadow-md"

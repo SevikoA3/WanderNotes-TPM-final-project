@@ -206,6 +206,7 @@ export default function AddNewScreen() {
         longitude: location.longitude,
         address,
         createdAt: new Date().toISOString(),
+        createdTimezone: user.timezone || "UTC", // simpan timezone saat pembuatan
       });
       // Ambil id note yang baru
       const lastNote = await db
@@ -335,10 +336,14 @@ export default function AddNewScreen() {
               <View className="flex mb-2">
                 <Text className="text-base text-accent">
                   Created At:{" "}
-                  {new Date().toLocaleDateString("en-GB", {
+                  {new Date().toLocaleString("en-GB", {
                     day: "2-digit",
                     month: "long",
                     year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                    timeZone: user?.timezone || "Asia/Jakarta",
                   })}
                 </Text>
               </View>

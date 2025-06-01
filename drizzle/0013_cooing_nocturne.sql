@@ -1,0 +1,1 @@
+ALTER TABLE `notes` ADD `created_timezone` text DEFAULT 'UTC' NOT NULL;

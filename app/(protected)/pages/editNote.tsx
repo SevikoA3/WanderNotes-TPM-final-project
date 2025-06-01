@@ -476,10 +476,14 @@ const EditNote = () => {
                 <Text className="text-base text-accent">
                   Created At:{" "}
                   {createdAt
-                    ? new Date(createdAt).toLocaleDateString("en-GB", {
+                    ? new Date(createdAt).toLocaleString("en-GB", {
                         day: "2-digit",
                         month: "long",
                         year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        timeZone: user?.timezone || "Asia/Jakarta",
                       })
                     : "-"}
                 </Text>

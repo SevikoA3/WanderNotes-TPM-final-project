@@ -16,6 +16,7 @@ export const notes = sqliteTable("notes", {
   reminderAt: text("reminder_at"),
   isReminderSet: integer("is_reminder_set", { mode: "boolean" }).default(false),
   stepCount: integer("step_count").default(0),
+  createdTimezone: text("created_timezone").notNull().default("UTC"), // timezone saat note dibuat
 });
 
 // Reminders table
@@ -37,6 +38,7 @@ export const users = sqliteTable("users", {
   profileImage: text("profile_image").default(
     "https://static.vecteezy.com/system/resources/previews/026/434/409/non_2x/default-avatar-profile-icon-social-media-user-photo-vector.jpg"
   ),
+  timezone: text("timezone").default("Asia/Jakarta"), // default ke Asia/Jakarta
 });
 
 export default {};

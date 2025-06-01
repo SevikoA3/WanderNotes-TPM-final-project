@@ -1,7 +1,9 @@
+import { Picker } from "@react-native-picker/picker";
 import * as Crypto from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
+  Globe,
   Image as ImageIcon,
   Key,
   Trash,
@@ -30,6 +32,21 @@ type UserData = {
   profileImage: string | null;
 };
 
+const TIMEZONES = [
+  "Asia/Jakarta",
+  "Asia/Makassar",
+  "Asia/Jayapura",
+  "Asia/Singapore",
+  "Asia/Bangkok",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Europe/London",
+  "Europe/Paris",
+  "America/New_York",
+  "America/Los_Angeles",
+  "Australia/Sydney",
+];
+
 const SettingsScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
@@ -44,6 +61,10 @@ const SettingsScreen = () => {
   const [newUsername, setNewUsername] = useState("");
   const [showChangeProfilePic, setShowChangeProfilePic] = useState(false);
   const [newProfilePic, setNewProfilePic] = useState<string | null>(null);
+  const [showChangeTimezone, setShowChangeTimezone] = useState(false);
+  const [newTimezone, setNewTimezone] = useState<string>(
+    user?.timezone || "Asia/Jakarta"
+  );
 
   // Fetch latest user data from DB
   const fetchUserData = async () => {
@@ -199,6 +220,25 @@ const SettingsScreen = () => {
       fetchUserData(); // Refresh user data
     } catch (err) {
       Alert.alert("Error", "Failed to update profile picture.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleChangeTimezone() {
+    if (!user) return;
+    setLoading(true);
+    try {
+      await db
+        .update(users)
+        .set({ timezone: newTimezone })
+        .where(eq(users.id, user.id))
+        .run();
+      Alert.alert("Success", "Timezone updated!");
+      setShowChangeTimezone(false);
+      fetchUserData();
+    } catch (err) {
+      Alert.alert("Error", "Failed to update timezone.");
     } finally {
       setLoading(false);
     }
@@ -410,6 +450,42 @@ const SettingsScreen = () => {
             >
               <Text className="text-primary text-center font-bold text-base">
                 {loading ? "Saving..." : "Save Password"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Change Timezone */}
+        <TouchableOpacity onPress={() => setShowChangeTimezone((v) => !v)}>
+          <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+            <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
+              <Globe size={24} color="#1b130d" />
+            </View>
+            <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
+              Change Timezone
+            </Text>
+          </View>
+        </TouchableOpacity>
+        {showChangeTimezone && (
+          <View className="px-4 pb-4">
+            <View className="bg-surface rounded-lg border border-accent mb-2">
+              <Picker
+                selectedValue={newTimezone}
+                onValueChange={setNewTimezone}
+                style={{ width: "100%", color: "#1b130d" }}
+              >
+                {TIMEZONES.map((tz) => (
+                  <Picker.Item key={tz} label={tz} value={tz} />
+                ))}
+              </Picker>
+            </View>
+            <TouchableOpacity
+              className="bg-orange-light py-3 rounded-full w-full mb-2 shadow-md"
+              disabled={loading}
+              onPress={handleChangeTimezone}
+            >
+              <Text className="text-primary text-center font-bold text-base">
+                {loading ? "Saving..." : "Save Timezone"}
               </Text>
             </TouchableOpacity>
           </View>

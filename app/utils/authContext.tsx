@@ -8,6 +8,7 @@ interface AuthContextType {
     username: string;
     createdAt: string;
     profileImage: string;
+    timezone: string; // Tambah timezone
   } | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -23,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     username: string;
     createdAt: string;
     profileImage: string;
+    timezone: string; // Tambah timezone
   } | null>(null);
 
   const login = async (username: string, password: string) => {
@@ -40,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (userRow.password !== hash) return false;
     const { password: _, ...safeUserData } = userRow;
     // @ts-ignore
-    setUser(safeUserData);
+    setUser(safeUserData); // safeUserData sudah mengandung timezone
     return true;
   };
 

@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ReminderList from "../../components/ReminderList";
 import db from "../../db/db";
 import { notes, reminders } from "../../db/schema";
+import { useAuth } from "../../utils/authContext";
 
 type Note = {
   id: number;
@@ -35,7 +36,10 @@ const ViewNoteScreen = () => {
   const [loading, setLoading] = useState(true);
   const [remindersState, setReminders] = useState<Date[]>([]);
   const [createdAt, setCreatedAt] = useState<string>("");
+  const [createdTimezone, setCreatedTimezone] = useState<string>("");
+  const [userTimezone, setUserTimezone] = useState<string>("");
   const navigation = useNavigation();
+  const { user } = useAuth();
 
   // Refactor fetchNote supaya bisa dipakai di event focus
   const fetchNote = useCallback(async () => {
@@ -57,6 +61,14 @@ const ViewNoteScreen = () => {
             address: result.address,
             stepCount: result.stepCount ?? 0,
           });
+          setCreatedTimezone(result.createdTimezone || "UTC");
+          // Ambil timezone user terbaru dari DB
+          const userRow = await db
+            .select()
+            .from(require("../../db/schema").users)
+            .where(eq(require("../../db/schema").users.id, result.userId))
+            .get();
+          setUserTimezone(userRow?.timezone || "Asia/Jakarta");
         } else {
           setNote(null);
         }
@@ -119,18 +131,51 @@ const ViewNoteScreen = () => {
             </View>
           ) : null}
           {/* Created date above address, no calendar icon, with time */}
-          <Text className="text-base text-accent mx-4 mb-2">
-            {createdAt
-              ? new Date(createdAt).toLocaleString("en-GB", {
+          {createdAt &&
+          createdTimezone &&
+          userTimezone &&
+          userTimezone !== createdTimezone ? (
+            <View className="mx-4 mb-2">
+              <Text className="text-base text-accent">
+                ({createdTimezone}):{" "}
+                {new Date(createdAt).toLocaleString("en-GB", {
                   day: "2-digit",
                   month: "long",
                   year: "numeric",
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
-                })
-              : "-"}
-          </Text>
+                  timeZone: createdTimezone,
+                })}
+              </Text>
+              <Text className="text-base text-accent mt-1">
+                ({userTimezone}):{" "}
+                {new Date(createdAt).toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: userTimezone,
+                })}
+              </Text>
+            </View>
+          ) : (
+            <Text className="text-base text-accent mx-4 mb-2">
+              {createdAt
+                ? new Date(createdAt).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                    timeZone: userTimezone || createdTimezone || "Asia/Jakarta",
+                  })
+                : "-"}
+            </Text>
+          )}
           {/* Lokasi di bawah tanggal */}
           {note.address ? (
             <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text>

@@ -13,6 +13,8 @@ import m0008 from './0008_mighty_timeslip.sql';
 import m0009 from './0009_common_norrin_radd.sql';
 import m0010 from './0010_brief_electro.sql';
 import m0011 from './0011_special_impossible_man.sql';
+import m0012 from './0012_cynical_wraith.sql';
+import m0013 from './0013_cooing_nocturne.sql';
 
   export default {
     journal,
@@ -28,7 +30,9 @@ m0007,
 m0008,
 m0009,
 m0010,
-m0011
+m0011,
+m0012,
+m0013
     }
   }
   
