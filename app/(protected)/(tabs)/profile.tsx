@@ -1,14 +1,9 @@
 import { useRouter } from "expo-router";
 import { ArrowLeft, Gear, Megaphone, X } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
 import React from "react";
-import {
-  ImageBackground,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import UserAvatar from "../../components/UserAvatar";
 import { useAuth } from "../../utils/auth-context";
 
 // Notes for usage:
@@ -18,7 +13,7 @@ import { useAuth } from "../../utils/auth-context";
 
 const ProfileScreen = () => {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const handleNavigateToSettings = () => {
     router.push("/pages/settings"); // Navigate to settings screen
@@ -67,22 +62,26 @@ const ProfileScreen = () => {
           <View className="flex p-4 items-center">
             <View className="flex w-full flex-col gap-4 items-center">
               <View className="flex gap-4 flex-col items-center">
-                <ImageBackground
-                  source={{
-                    uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFFvJbcDJruUzaNmgOfeyWGItfMwMh9jgAYWFmyibDAyK5W5pwFtQLbsK1yLisSmBDSW9ISLF7zcJq-Ym2-PKGFIq0wv_JmugruOLbHRYw-doP54VEu_YptzNSrCPS8LKiH_Sq0OMNVKdeCk_XJYmwUxMs18Z4SiERBvjgE4qD8-2v2V4PjotPyzvl0U8G96dzyMtAPr_oqUp58ICJWYvvC1E5-gq55uXAkesu29bebNe3ua5VBaZAbfco394t9057CqE1Jkyh4g0I",
-                  }}
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32"
-                  imageStyle={{ borderRadius: 9999 }}
+                <UserAvatar
+                  uri={
+                    user?.profileImage ||
+                    "https://static.vecteezy.com/system/resources/previews/026/434/409/non_2x/default-avatar-profile-icon-social-media-user-photo-vector.jpg"
+                  }
+                  size={128}
                 />
                 <View className="flex flex-col items-center justify-center">
                   <Text className="text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] text-center">
-                    Sophia Carter
+                    {user?.username}
                   </Text>
                   <Text className="text-accent text-base font-normal leading-normal text-center">
-                    Travel Enthusiast
-                  </Text>
-                  <Text className="text-accent text-base font-normal leading-normal text-center">
-                    Joined 2021
+                    Created At:{" "}
+                    {user?.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : ""}
                   </Text>
                 </View>
               </View>

@@ -3,7 +3,12 @@ import db, { eq } from "../db/db";
 import { users } from "../db/schema";
 
 interface AuthContextType {
-  user: string | null;
+  user: {
+    id: number;
+    username: string;
+    createdAt: string;
+    profileImage: string;
+  } | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -13,7 +18,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<string | null>(null);
+  const [user, setUser] = useState<{
+    id: number;
+    username: string;
+    createdAt: string;
+    profileImage: string;
+  } | null>(null);
 
   const login = async (username: string, password: string) => {
     // Cari user di database
@@ -28,7 +38,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password)
     );
     if (userRow.password !== hash) return false;
-    setUser(username);
+    const { password: _, ...safeUserData } = userRow;
+    setUser(safeUserData);
     return true;
   };
 
@@ -48,3 +59,5 @@ export const useAuth = () => {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 };
+
+export default {};
