@@ -27,7 +27,7 @@ import { useAuth } from "../../utils/authContext";
 import { copyImageToAppDir } from "../../utils/image";
 import { getTimezoneFromCoords, reverseGeocode } from "../../utils/location";
 
-export default function AddNewScreen() {
+export default function AddNoteScreen() {
   const router = useRouter();
   const { user } = useAuth(); // <--- Ambil user dari context
   const params = useLocalSearchParams();

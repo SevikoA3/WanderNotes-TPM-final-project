@@ -12,9 +12,9 @@ export default function componentsLayout() {
         }}
       >
         <Stack.Screen
-          name="addNew"
+          name="addNote"
           options={{
-            title: "New Adventure", // Title for the addNew screen
+            title: "New Adventure", // Title for the addNote screen
             headerShown: true, // Show header for this screen
             headerStyle: {
               backgroundColor: "#fcfaf8", // Use Tailwind config color

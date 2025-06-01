@@ -119,7 +119,7 @@ const HomeScreen = () => {
       </ScrollView>
       {/* Floating Plus Button */}
       <TouchableOpacity
-        onPress={() => router.push("/pages/addNew")}
+        onPress={() => router.push("/pages/addNote")}
         className="absolute bottom-8 right-6 bg-orange rounded-full w-16 h-16 items-center justify-center shadow-lg"
         activeOpacity={0.85}
       >
