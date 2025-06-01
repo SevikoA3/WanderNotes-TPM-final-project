@@ -37,8 +37,8 @@ export const users = sqliteTable("users", {
   createdAt: text("created_at").notNull(),
   profileImage: text("profile_image").default(
     "https://static.vecteezy.com/system/resources/previews/026/434/409/non_2x/default-avatar-profile-icon-social-media-user-photo-vector.jpg"
-  ),
-  timezone: text("timezone").default("Asia/Jakarta"), // default ke Asia/Jakarta
+  ).notNull(),
+  timezone: text("timezone").default("Asia/Jakarta").notNull()
 });
 
 export default {};

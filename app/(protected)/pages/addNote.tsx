@@ -264,7 +264,7 @@ export default function AddNoteScreen() {
               content: {
                 title: `Reminder: ${title}`,
                 body: description,
-                data: { noteId }, // <--- Tambahkan noteId ke data
+                data: { noteId }, 
               },
               trigger: {
                 date: reminderDate,

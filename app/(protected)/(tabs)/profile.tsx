@@ -61,88 +61,72 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <View className="flex-1 justify-between">
-        {/* Main Content ScrollView */}
-        <ScrollView>
-          {/* Header */}
-          <View className="flex-row items-center bg-background p-4 pb-2 justify-between">
-            <Text className="text-primary text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
-              Profile
+      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+        {/* Header */}
+        <Text className="text-primary text-2xl font-bold px-6 pt-6 pb-2 text-center">
+          Profile
+        </Text>
+
+        {/* Profile Info */}
+        <View className="flex p-6 items-center bg-white/80 rounded-2xl shadow-md mx-4 mb-6">
+          <UserAvatar uri={userData?.profileImage || ""} size={96} />
+          <View className="flex flex-col items-center justify-center mt-4">
+            <Text className="text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] text-center mb-1">
+              {userData?.username}
+            </Text>
+            <Text className="text-accent text-base font-normal leading-normal text-center">
+              Created At:{" "}
+              {userData?.createdAt
+                ? new Date(userData.createdAt).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : ""}
             </Text>
           </View>
+        </View>
 
-          {/* Profile Info */}
-          <View className="flex p-4 items-center">
-            <View className="flex w-full flex-col gap-4 items-center">
-              <View className="flex gap-4 flex-col items-center">
-                <UserAvatar
-                  uri={
-                    userData?.profileImage ||
-                    require("../../../assets/images/defaultProfilePicture.jpg")
-                  }
-                  size={128}
-                />
-                <View className="flex flex-col items-center justify-center">
-                  <Text className="text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] text-center">
-                    {userData?.username}
-                  </Text>
-                  <Text className="text-accent text-base font-normal leading-normal text-center">
-                    Created At:{" "}
-                    {userData?.createdAt
-                      ? new Date(userData.createdAt).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )
-                      : ""}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Action List */}
+        {/* Action List */}
+        <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">
+          Actions
+        </Text>
+        <View className="bg-white/80 rounded-2xl shadow-md mx-4 mb-10 divide-y divide-accent/20">
           <TouchableOpacity onPress={handleNavigateToSettings}>
-            <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+            <View className="flex-row items-center gap-4 px-4 py-4">
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Gear size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
+              <Text className="text-primary text-base font-normal flex-1 truncate">
                 Settings
               </Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleKesanPesan}>
-            <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+            <View className="flex-row items-center gap-4 px-4 py-4">
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Megaphone size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
+              <Text className="text-primary text-base font-normal flex-1 truncate">
                 Impressions & Messages
               </Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleLogout}>
-            <View className="flex-row items-center gap-4 bg-background px-4 min-h-14">
+            <View className="flex-row items-center gap-4 px-4 py-4">
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 {/* Using SignOut icon might be more conventional for logout */}
                 <ArrowLeft size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal leading-normal flex-1 truncate">
+              <Text className="text-primary text-base font-normal flex-1 truncate">
                 Logout
               </Text>
             </View>
           </TouchableOpacity>
-        </ScrollView>
-
-        {/* Spacer for bottom safe area, if not using a tab bar that handles it */}
-        {/* <View className="h-5 bg-background" /> */}
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

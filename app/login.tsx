@@ -1,3 +1,4 @@
+import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { Eye, EyeSlash } from "phosphor-react-native";
 import React, { useState } from "react";
@@ -18,6 +19,48 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+
+  React.useEffect(() => {
+    // Cek fingerprint login otomatis
+    (async () => {
+      const SecureStore = await import("expo-secure-store");
+      const enabled = await SecureStore.getItemAsync("fingerprint_enabled");
+      const savedUsername = await SecureStore.getItemAsync("saved_username");
+      if (enabled === "true" && savedUsername) {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (hasHardware && isEnrolled) {
+          const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: "Login dengan sidik jari",
+            cancelLabel: "Batal",
+            disableDeviceFallback: true,
+          });
+          if (result.success) {
+            // Auto-login tanpa password (gunakan password kosong atau logic khusus)
+            handleLoginFingerprint(savedUsername);
+          }
+        }
+      }
+    })();
+  }, []);
+
+  const handleLoginFingerprint = async (username: string) => {
+    setLoading(true);
+    try {
+      const success = await login(username, "");
+      if (success) {
+        router.replace({ pathname: "/home" });
+        return;
+      } else {
+        Alert.alert(
+          "Error",
+          "Fingerprint login failed. Please login manually."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     const trimmedUsername = username.trim();
@@ -48,7 +91,7 @@ export default function LoginScreen() {
         {
           text: "OK",
           onPress: () =>
-            router.replace({ pathname: "/(protected)/(tabs)/home" }),
+            router.replace({ pathname: "/home" }),
         },
       ]);
       setUsername("");
