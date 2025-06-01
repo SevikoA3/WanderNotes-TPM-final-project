@@ -242,6 +242,30 @@ const EditNote = () => {
   };
 
   const handleSave = async () => {
+    // Cek izin lokasi
+    try {
+      const { status } = await (
+        await import("expo-location")
+      ).requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Location Permission Required",
+          "Please allow location access in your device settings to use this feature."
+        );
+        return;
+      }
+    } catch (e) {
+      // Jika modul tidak ditemukan, abaikan
+    }
+    // Cek izin notifikasi
+    const notifPerm = await Notifications.requestPermissionsAsync();
+    if (notifPerm.status !== "granted") {
+      Alert.alert(
+        "Notification Permission Required",
+        "Please allow notification access in your device settings to set reminders."
+      );
+      return;
+    }
     if (!user || (note && note.userId !== user.id)) {
       Alert.alert("Forbidden", "You are not allowed to edit this note.");
       return;

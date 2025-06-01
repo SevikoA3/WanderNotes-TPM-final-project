@@ -27,7 +27,37 @@ const StepCounterScreen = () => {
   const { user } = useAuth();
 
   // {Start Counting Handler}
-  const startCounting = () => {
+  const startCounting = async () => {
+    // Cek ulang permission setiap kali start
+    let permStatus = permissionStatus;
+    try {
+      const perm = await Pedometer.getPermissionsAsync();
+      permStatus = perm.status;
+      setPermissionStatus(perm.status);
+      if (perm.status !== "granted") {
+        const req = await Pedometer.requestPermissionsAsync();
+        permStatus = req.status;
+        setPermissionStatus(req.status);
+        if (req.status !== "granted") {
+          Alert.alert(
+            "Pedometer Permission Required",
+            "Please allow pedometer access in your device settings to use this feature."
+          );
+          return;
+        }
+      }
+    } catch (e) {
+      // Jika error, tampilkan alert
+      Alert.alert(
+        "Pedometer Error",
+        "Failed to check/request pedometer permission."
+      );
+      return;
+    }
+    if (!selectedNoteId) {
+      Alert.alert("No Note Selected", "Please select a note first.");
+      return;
+    }
     setIsCounting(true);
     // Save current stepCounted as base
     const baseStepCounted = stepCounted;
@@ -160,6 +190,10 @@ const StepCounterScreen = () => {
 
   // Handler: Stop counting and accumulate steps to note
   const handleStopCounting = async () => {
+    if (!selectedNoteId) {
+      Alert.alert("No Note Selected", "Please select a note first.");
+      return;
+    }
     setIsCounting(false);
     if (subscriptionRef.current) {
       subscriptionRef.current.remove();
@@ -190,12 +224,12 @@ const StepCounterScreen = () => {
       const perm = await Pedometer.getPermissionsAsync();
       setPermissionStatus(perm.status);
       if (!perm.granted) {
-        const req = await Pedometer.requestPermissionsAsync();
-        setPermissionStatus(req.status);
-        if (!req.granted) {
-          setIsPedometerAvailable("Permission denied");
-          return;
-        }
+        setIsPedometerAvailable("Permission denied");
+        Alert.alert(
+          "Pedometer Permission Required",
+          "Please allow pedometer access in your device settings to use this feature."
+        );
+        return;
       }
       const isAvailable = await Pedometer.isAvailableAsync();
       setIsPedometerAvailable(isAvailable ? "Yes" : "No");
