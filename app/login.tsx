@@ -1,6 +1,7 @@
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
-import { Eye, EyeSlash } from "phosphor-react-native";
+import * as SecureStore from "expo-secure-store";
+import { Eye, EyeSlash, Fingerprint } from "phosphor-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -17,45 +18,49 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [fingerprintEnabled, setFingerprintEnabled] = useState(false);
+  const [hasSavedUsername, setHasSavedUsername] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
   React.useEffect(() => {
-    // Cek fingerprint login otomatis
     (async () => {
-      const SecureStore = await import("expo-secure-store");
       const enabled = await SecureStore.getItemAsync("fingerprint_enabled");
+      setFingerprintEnabled(enabled === "true");
       const savedUsername = await SecureStore.getItemAsync("saved_username");
-      if (enabled === "true" && savedUsername) {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        if (hasHardware && isEnrolled) {
-          const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: "Login dengan sidik jari",
-            cancelLabel: "Batal",
-            disableDeviceFallback: true,
-          });
-          if (result.success) {
-            // Auto-login tanpa password (gunakan password kosong atau logic khusus)
-            handleLoginFingerprint(savedUsername);
-          }
-        }
+      if (savedUsername) {
+        setUsername(savedUsername);
+        setHasSavedUsername(true);
       }
     })();
   }, []);
 
-  const handleLoginFingerprint = async (username: string) => {
+  // Fungsi untuk handle login fingerprint
+  const handleLoginWithFingerprint = async () => {
     setLoading(true);
     try {
-      const success = await login(username, "");
-      if (success) {
-        router.replace({ pathname: "/home" });
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!hasHardware || !isEnrolled) {
+        Alert.alert("Error", "Fingerprint not available or not enrolled.");
         return;
-      } else {
-        Alert.alert(
-          "Error",
-          "Fingerprint login failed. Please login manually."
-        );
+      }
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Login dengan sidik jari",
+        cancelLabel: "Batal",
+        disableDeviceFallback: true,
+      });
+      if (result.success) {
+        const success = await login(username, "");
+        if (success) {
+          router.replace({ pathname: "/home" });
+          return;
+        } else {
+          Alert.alert(
+            "Error",
+            "Fingerprint login failed. Please login manually."
+          );
+        }
       }
     } finally {
       setLoading(false);
@@ -90,8 +95,7 @@ export default function LoginScreen() {
       Alert.alert("Success", "Login successful!", [
         {
           text: "OK",
-          onPress: () =>
-            router.replace({ pathname: "/home" }),
+          onPress: () => router.replace({ pathname: "/home" }),
         },
       ]);
       setUsername("");
@@ -143,16 +147,28 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            className="bg-orange-light py-4 rounded-full w-full mb-2 shadow-md"
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            <Text className="text-primary text-center font-bold text-xl">
-              {loading ? "Logging in..." : "Login"}
-            </Text>
-          </TouchableOpacity>
+          <View className="w-full flex-row items-center justify-between mb-2">
+            <TouchableOpacity
+              className="bg-orange-light py-4 rounded-full flex-1 shadow-md mr-2"
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.85}
+            >
+              <Text className="text-primary text-center font-bold text-xl">
+                {loading ? "Logging in..." : "Login"}
+              </Text>
+            </TouchableOpacity>
+            {/* Tombol fingerprint login */}
+            {fingerprintEnabled && hasSavedUsername && (
+              <TouchableOpacity
+                className="bg-surface py-4 px-4 rounded-full items-center justify-center ml-2 shadow-md"
+                onPress={handleLoginWithFingerprint}
+                activeOpacity={0.8}
+              >
+                <Fingerprint size={28} color="#a97c5a" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
         <TouchableOpacity
           className="mt-4 mb-12 items-center"

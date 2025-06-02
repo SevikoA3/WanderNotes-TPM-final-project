@@ -121,81 +121,101 @@ const ViewNoteScreen = () => {
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <ScrollView className="flex-1">
         <View className="pb-4">
-          {note.imagePath ? (
-            <View className="p-4">
+          {/* Card utama note */}
+          <View className="bg-white/90 rounded-2xl shadow-md mx-4 mt-4 mb-4 p-0 overflow-hidden">
+            {note.imagePath ? (
               <Image
                 source={{ uri: note.imagePath }}
-                className="w-full rounded-lg h-64 mb-4"
+                className="w-full h-56 object-cover rounded-t-2xl"
                 resizeMode="cover"
               />
-            </View>
-          ) : null}
-          {/* Created date above address, no calendar icon, with time */}
-          {createdAt &&
-          createdTimezone &&
-          userTimezone &&
-          userTimezone !== createdTimezone ? (
-            <View className="mx-4 mb-2">
-              <Text className="text-base text-accent">
-                ({createdTimezone}):{" "}
-                {new Date(createdAt).toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                  timeZone: createdTimezone,
-                })}
+            ) : null}
+            <View className="p-4">
+              {/* Tanggal & timezone */}
+              <View className="flex-row items-center mb-2">
+                <View className="bg-surface/80 rounded-lg px-3 py-2 w-full flex-row items-center gap-2">
+                  <Text className="text-accent text-lg mr-1">🕒</Text>
+                  {createdAt &&
+                  createdTimezone &&
+                  userTimezone &&
+                  userTimezone !== createdTimezone ? (
+                    <View>
+                      <Text className="text-accent text-base font-semibold">
+                        {createdTimezone}:{" "}
+                        {new Date(createdAt).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                          timeZone: createdTimezone,
+                        })}
+                      </Text>
+                      <Text className="text-accent text-base font-semibold mt-1">
+                        {userTimezone}:{" "}
+                        {new Date(createdAt).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                          timeZone: userTimezone,
+                        })}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text className="text-accent text-base font-semibold">
+                      {createdAt
+                        ? new Date(createdAt).toLocaleString("en-GB", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                            timeZone:
+                              userTimezone || createdTimezone || "Asia/Jakarta",
+                          })
+                        : "-"}
+                    </Text>
+                  )}
+                </View>
+              </View>
+              {/* Lokasi & step count */}
+              <View className="mb-2">
+                {note.address ? (
+                  <View className="flex-row items-center bg-surface/60 rounded-lg px-2 py-1 mb-2">
+                    <Text className="text-accent text-lg mr-1">📍</Text>
+                    <Text className="text-accent text-base">
+                      {note.address}
+                    </Text>
+                  </View>
+                ) : null}
+                <View className="flex-row items-center bg-surface/60 rounded-lg px-2 py-1">
+                  <Text className="text-accent text-lg mr-1">👣</Text>
+                  <Text className="text-accent text-base">
+                    {note.stepCount ?? 0} steps
+                  </Text>
+                </View>
+              </View>
+              {/* Deskripsi note */}
+              <Text className="text-primary text-lg leading-relaxed mt-2 mb-4">
+                {note.description}
               </Text>
-              <Text className="text-base text-accent mt-1">
-                ({userTimezone}):{" "}
-                {new Date(createdAt).toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                  timeZone: userTimezone,
-                })}
-              </Text>
+              {/* List reminders */}
+              <ReminderList
+                reminders={remindersState}
+                removable={false}
+                className="mt-2"
+              />
             </View>
-          ) : (
-            <Text className="text-base text-accent mx-4 mb-2">
-              {createdAt
-                ? new Date(createdAt).toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                    timeZone: userTimezone || createdTimezone || "Asia/Jakarta",
-                  })
-                : "-"}
-            </Text>
-          )}
-          {/* Lokasi di bawah tanggal */}
-          {note.address ? (
-            <Text className="text-accent text-s mx-4 mb-2">{note.address}</Text>
-          ) : null}
-          {/* Step Count */}
-          <Text className="text-accent text-base mx-4 mb-2">
-            Steps: {note.stepCount ?? 0}
-          </Text>
-          <Text className="text-primary text-base leading-relaxed m-4">
-            {note.description}
-          </Text>
-          {/* List reminders */}
-          <ReminderList
-            reminders={remindersState}
-            removable={false}
-            className="mx-4"
-          />
+          </View>
         </View>
       </ScrollView>
-      <View className="p-4 border-t border-surface">
+      {/* Tombol Edit Note sticky di bawah */}
+      <View className="p-4 border-t border-surface bg-white/90">
         <TouchableOpacity
           onPress={() =>
             router.push({
@@ -203,8 +223,8 @@ const ViewNoteScreen = () => {
               params: { id: note.id },
             })
           }
-          className="bg-orange rounded-lg py-4 items-center justify-center"
-          activeOpacity={0.8}
+          className="bg-orange rounded-lg py-4 items-center justify-center shadow-md"
+          activeOpacity={0.85}
         >
           <Text className="text-white text-lg font-semibold">Edit Note</Text>
         </TouchableOpacity>

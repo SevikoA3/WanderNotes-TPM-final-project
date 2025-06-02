@@ -324,7 +324,7 @@ export default function AddNoteScreen() {
                 style={{ minHeight: 56 }}
                 value={title}
                 onChangeText={setTitle}
-                maxLength={20}
+                maxLength={40}
               />
             </View>
             {/* Note Input */}
