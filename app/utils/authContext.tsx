@@ -14,6 +14,7 @@ interface AuthContextType {
   } | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateSavedUsername: (username: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,9 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
     if (userRow.password !== hash) return false;
     const { password: _, ...safeUserData } = userRow;
-    // Pastikan profileImage dan timezone tidak null
     setUser({ ...safeUserData });
-    // Simpan username ke SecureStore untuk fingerprint
     await SecureStore.setItemAsync(SAVED_USERNAME_KEY, username);
     return true;
   };
@@ -85,10 +84,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     setUser(null);
     SecureStore.deleteItemAsync(SAVED_USERNAME_KEY);
+    SecureStore.setItemAsync(FINGERPRINT_ENABLED_KEY, "false");
+  };
+
+  const updateSavedUsername = async (username: string) => {
+    await SecureStore.setItemAsync(SAVED_USERNAME_KEY, username);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateSavedUsername }}>
       {children}
     </AuthContext.Provider>
   );

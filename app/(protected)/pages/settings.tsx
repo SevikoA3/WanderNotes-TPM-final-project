@@ -39,7 +39,7 @@ const FINGERPRINT_ENABLED_KEY = "fingerprint_enabled";
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, updateSavedUsername } = useAuth();
 
   const [userData, setUserData] = useState<UserData | null>(user);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -209,6 +209,7 @@ const SettingsScreen = () => {
         .set({ username: trimmedUsername })
         .where(eq(users.id, user.id))
         .run();
+      await updateSavedUsername(trimmedUsername);
       Alert.alert("Success", "Username changed successfully!");
       setShowChangeUsername(false);
       setNewUsername("");
@@ -305,10 +306,7 @@ const SettingsScreen = () => {
           Account
         </Text>
         <View className="flex-row items-center gap-4 bg-background px-6 py-4 rounded-2xl shadow-sm mb-4">
-          <UserAvatar
-            uri={newProfilePic || userData?.profileImage || ""}
-            size={64}
-          />
+          <UserAvatar uri={userData?.profileImage || ""} size={64} />
           <View className="flex-col justify-center flex-1">
             <Text className="text-primary text-lg font-bold line-clamp-1 mb-1">
               {userData?.username}
