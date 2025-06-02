@@ -273,7 +273,7 @@ const EditNote = () => {
           latitude: latitude,
           longitude: longitude,
           address: address,
-          createdTimezone: timezone, // Ganti ke field yang benar
+          createdTimezone: timezone,
         })
         .where(eq(notes.id, Number(id)));
       Alert.alert("Success", "Note updated.", [
