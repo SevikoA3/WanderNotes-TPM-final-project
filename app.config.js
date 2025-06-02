@@ -77,7 +77,6 @@ export default ({ config }) => ({
         },
       ],
       "expo-sqlite",
-      "expo-maps",
       [
         "expo-local-authentication",
         {
