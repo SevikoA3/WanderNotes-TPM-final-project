@@ -225,10 +225,6 @@ const StepCounterScreen = () => {
       setPermissionStatus(perm.status);
       if (!perm.granted) {
         setIsPedometerAvailable("Permission denied");
-        Alert.alert(
-          "Pedometer Permission Required",
-          "Please allow pedometer access in your device settings to use this feature."
-        );
         return;
       }
       const isAvailable = await Pedometer.isAvailableAsync();
