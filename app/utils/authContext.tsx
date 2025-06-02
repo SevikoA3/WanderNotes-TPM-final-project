@@ -1,4 +1,3 @@
-import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import React, { createContext, useContext, useState } from "react";
 import db, { eq } from "../db/db";
@@ -32,28 +31,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     profileImage: string;
     timezone: string;
   } | null>(null);
-
-  // Cek fingerprint login saat mount
-  React.useEffect(() => {
-    (async () => {
-      const enabled = await SecureStore.getItemAsync(FINGERPRINT_ENABLED_KEY);
-      const savedUsername = await SecureStore.getItemAsync(SAVED_USERNAME_KEY);
-      if (enabled === "true" && savedUsername) {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        if (hasHardware && isEnrolled) {
-          const result = await LocalAuthentication.authenticateAsync({
-            cancelLabel: "Cancel",
-            disableDeviceFallback: true,
-          });
-          if (result.success) {
-            // Auto-login tanpa password (gunakan password kosong atau logic khusus)
-            await login(savedUsername, "");
-          }
-        }
-      }
-    })();
-  }, []);
 
   const login = async (username: string, password: string) => {
     // Cari user di database
