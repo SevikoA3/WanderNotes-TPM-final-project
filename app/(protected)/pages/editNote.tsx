@@ -257,15 +257,7 @@ const EditNote = () => {
     } catch (e) {
       // Jika modul tidak ditemukan, abaikan
     }
-    // Cek izin notifikasi
-    const notifPerm = await Notifications.requestPermissionsAsync();
-    if (notifPerm.status !== "granted") {
-      Alert.alert(
-        "Notification Permission Required",
-        "Please allow notification access in your device settings to set reminders."
-      );
-      return;
-    }
+    // Tidak perlu cek/minta izin notifikasi di sini
     if (!user || (note && note.userId !== user.id)) {
       Alert.alert("Forbidden", "You are not allowed to edit this note.");
       return;
@@ -307,6 +299,21 @@ const EditNote = () => {
         onPress: async () => {
           setDeleting(true);
           try {
+            // Cancel semua notification terkait note ini
+            const reminderRows = await db
+              .select()
+              .from(reminders)
+              .where(eq(reminders.noteId, Number(id)))
+              .all();
+            for (const r of reminderRows) {
+              if (r.notificationId) {
+                try {
+                  await Notifications.cancelScheduledNotificationAsync(
+                    r.notificationId
+                  );
+                } catch {}
+              }
+            }
             await db.delete(notes).where(eq(notes.id, Number(id)));
             Alert.alert("Deleted", "Note deleted.", [
               { text: "OK", onPress: () => router.replace("/home") },
@@ -347,37 +354,34 @@ const EditNote = () => {
     fetchNoteCreatedAt();
   }, [id]);
 
-  const handleAddReminder = () => {
+  const handleAddReminder = async () => {
+    // Cek izin notifikasi sebelum buka date picker
+    const notifPerm = await Notifications.getPermissionsAsync();
+    if (notifPerm.status !== "granted") {
+      const requestPerm = await Notifications.requestPermissionsAsync();
+      if (requestPerm.status !== "granted") {
+        Alert.alert(
+          "Notification Permission Required",
+          "Please allow notification access in your device settings to set reminders."
+        );
+        return;
+      }
+    }
     setDatePickerValue(new Date());
     setDatePickerVisibility(true);
   };
   const hideDatePicker = () => setDatePickerVisibility(false);
   const handleConfirmDate = async (date: Date) => {
-    // Minta permission notifikasi
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission denied",
-        "Notification permission is required to set reminders."
-      );
-      hideDatePicker();
-      return;
-    }
     if (!remindersState.some((r) => r.getTime() === date.getTime())) {
       // Insert to DB
       if (id) {
-        const result = await db.insert(reminders).values({
-          noteId: Number(id),
-          reminderAt: date.toISOString(),
-          createdAt: new Date().toISOString(),
-        });
-        // Jadwalkan notifikasi
+        let notificationId = null;
         try {
-          const notifResult = await Notifications.scheduleNotificationAsync({
+          notificationId = await Notifications.scheduleNotificationAsync({
             content: {
               title: `Reminder: ${title}`,
               body: description,
-              data: { noteId: id }, // <--- Tambahkan noteId ke data
+              data: { noteId: id },
             },
             trigger: {
               date,
@@ -387,6 +391,12 @@ const EditNote = () => {
         } catch (e) {
           console.log("Failed to schedule notification (edit):", e);
         }
+        await db.insert(reminders).values({
+          noteId: Number(id),
+          reminderAt: date.toISOString(),
+          createdAt: new Date().toISOString(),
+          notificationId: notificationId || null,
+        });
         // Re-fetch reminders
         const reminderRows = await db
           .select()
@@ -401,6 +411,19 @@ const EditNote = () => {
   };
   const handleRemoveReminder = async (idx: number) => {
     if (reminderIds[idx]) {
+      // Ambil notificationId sebelum delete
+      const reminderRow = await db
+        .select()
+        .from(reminders)
+        .where(eq(reminders.id, reminderIds[idx]))
+        .get();
+      if (reminderRow?.notificationId) {
+        try {
+          await Notifications.cancelScheduledNotificationAsync(
+            reminderRow.notificationId
+          );
+        } catch {}
+      }
       await db.delete(reminders).where(eq(reminders.id, reminderIds[idx]));
       // Re-fetch reminders
       if (id) {

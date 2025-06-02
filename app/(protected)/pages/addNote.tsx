@@ -164,7 +164,19 @@ export default function AddNoteScreen() {
   };
 
   // Handler untuk menambah reminder
-  const handleAddReminder = () => {
+  const handleAddReminder = async () => {
+    // Cek izin notifikasi sebelum buka date picker
+    const notifPerm = await Notifications.getPermissionsAsync();
+    if (notifPerm.status !== "granted") {
+      const requestPerm = await Notifications.requestPermissionsAsync();
+      if (requestPerm.status !== "granted") {
+        Alert.alert(
+          "Notification Permission Required",
+          "Please allow notification access in your device settings to set reminders."
+        );
+        return;
+      }
+    }
     setDatePickerValue(new Date());
     setDatePickerVisibility(true);
   };
@@ -202,15 +214,7 @@ export default function AddNoteScreen() {
     } catch (e) {
       // Jika modul tidak ditemukan, abaikan
     }
-    // Cek izin notifikasi
-    const notifPerm = await Notifications.requestPermissionsAsync();
-    if (notifPerm.status !== "granted") {
-      Alert.alert(
-        "Notification Permission Required",
-        "Please allow notification access in your device settings to set reminders."
-      );
-      return;
-    }
+    // Tidak perlu cek/minta izin notifikasi di sini
     if (!user) {
       Alert.alert("Error", "User not found. Please login again.");
       return;
@@ -253,18 +257,13 @@ export default function AddNoteScreen() {
       // Simpan reminders ke tabel reminders
       if (noteId && remindersState.length > 0) {
         for (const reminderDate of remindersState) {
-          await db.insert(reminders).values({
-            noteId,
-            reminderAt: reminderDate.toISOString(),
-            createdAt: new Date().toISOString(),
-          });
-          // Jadwalkan notifikasi
+          let notificationId = null;
           try {
-            const notifResult = await Notifications.scheduleNotificationAsync({
+            notificationId = await Notifications.scheduleNotificationAsync({
               content: {
                 title: `Reminder: ${title}`,
                 body: description,
-                data: { noteId }, 
+                data: { noteId },
               },
               trigger: {
                 date: reminderDate,
@@ -274,6 +273,12 @@ export default function AddNoteScreen() {
           } catch (e) {
             console.log("Failed to schedule notification:", e);
           }
+          await db.insert(reminders).values({
+            noteId,
+            reminderAt: reminderDate.toISOString(),
+            createdAt: new Date().toISOString(),
+            notificationId: notificationId || null,
+          });
         }
       }
       setSaving(false);

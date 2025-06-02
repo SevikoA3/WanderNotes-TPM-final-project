@@ -27,6 +27,7 @@ export const reminders = sqliteTable("reminders", {
     .references(() => notes.id),
   reminderAt: text("reminder_at").notNull(),
   createdAt: text("created_at").notNull(),
+  notificationId: text("notification_id"),
 });
 
 // Users table
@@ -35,10 +36,12 @@ export const users = sqliteTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   createdAt: text("created_at").notNull(),
-  profileImage: text("profile_image").default(
-    "https://static.vecteezy.com/system/resources/previews/026/434/409/non_2x/default-avatar-profile-icon-social-media-user-photo-vector.jpg"
-  ).notNull(),
-  timezone: text("timezone").default("Asia/Jakarta").notNull()
+  profileImage: text("profile_image")
+    .default(
+      "https://static.vecteezy.com/system/resources/previews/026/434/409/non_2x/default-avatar-profile-icon-social-media-user-photo-vector.jpg"
+    )
+    .notNull(),
+  timezone: text("timezone").default("Asia/Jakarta").notNull(),
 });
 
 export default {};
