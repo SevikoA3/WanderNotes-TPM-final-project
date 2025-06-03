@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { ArrowLeft, Gear, Megaphone } from "phosphor-react-native"; // Renamed User to UserIcon to avoid conflict
+import { ArrowLeft, Gear, Megaphone } from "phosphor-react-native";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,11 +7,6 @@ import UserAvatar from "../../components/UserAvatar";
 import db, { eq } from "../../db/db";
 import { users } from "../../db/schema";
 import { useAuth } from "../../utils/authContext";
-
-// Notes for usage:
-// 1. Icons: Uses phosphor-react-native. Ensure it's installed.
-// 2. Navigation: Uses useRouter from expo-router for navigation.
-// 3. NativeWind: Assumes NativeWind v4+ for direct className.
 
 type UserData = {
   id: number;
@@ -47,7 +42,7 @@ const ProfileScreen = () => {
   );
 
   const handleNavigateToSettings = () => {
-    router.push("/pages/settings"); // Navigate to settings screen
+    router.push("/pages/settings");
   };
 
   const handleLogout = async () => {
@@ -68,7 +63,7 @@ const ProfileScreen = () => {
         </Text>
 
         {/* Profile Info */}
-        <View className="flex p-6 items-center bg-white/80 rounded-2xl shadow-md mx-4 mb-6">
+        <View className="flex p-6 items-center bg-background rounded-2xl shadow-md mx-4 mb-6">
           <UserAvatar uri={userData?.profileImage || ""} size={96} />
           <View className="flex flex-col items-center justify-center mt-4">
             <Text className="text-primary text-[22px] font-bold leading-tight tracking-[-0.015em] text-center mb-1">
@@ -91,7 +86,7 @@ const ProfileScreen = () => {
         <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">
           Actions
         </Text>
-        <View className="bg-white/80 rounded-2xl shadow-md mx-4 mb-10 divide-y divide-accent/20">
+        <View className="bg-background rounded-2xl shadow-md mx-4 mb-10 divide-y divide-accent/20">
           <TouchableOpacity onPress={handleNavigateToSettings}>
             <View className="flex-row items-center gap-4 px-4 py-4">
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">

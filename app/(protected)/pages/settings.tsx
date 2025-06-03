@@ -4,24 +4,9 @@ import * as ImagePicker from "expo-image-picker";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import {
-  Globe,
-  Image as ImageIcon,
-  Key,
-  Trash,
-  UserCircle,
-} from "phosphor-react-native";
-import React, { useState } from "react";
-import {
-  Alert,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Globe, Image as ImageIcon, Key, Trash, UserCircle } from "phosphor-react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import UserAvatar from "../../components/UserAvatar";
 import db, { eq } from "../../db/db";
 import { users } from "../../db/schema";
@@ -33,6 +18,7 @@ type UserData = {
   username: string;
   createdAt: string;
   profileImage: string | null;
+  timezone: string;
 };
 
 const FINGERPRINT_ENABLED_KEY = "fingerprint_enabled";
@@ -52,23 +38,23 @@ const SettingsScreen = () => {
   const [showChangeProfilePic, setShowChangeProfilePic] = useState(false);
   const [newProfilePic, setNewProfilePic] = useState<string | null>(null);
   const [showChangeTimezone, setShowChangeTimezone] = useState(false);
-  const [timezone, setTimezone] = useState<string>(
-    user?.timezone || "Asia/Jakarta"
-  );
+  const [timezone, setTimezone] = useState<string>(user?.timezone || "Asia/Jakarta");
   const [allTimezones] = useState<string[]>(getAllTimezones());
   const [fingerprintEnabled, setFingerprintEnabled] = useState<boolean>(false);
-  const [fingerprintSupported, setFingerprintSupported] =
-    useState<boolean>(false);
+  const [fingerprintSupported, setFingerprintSupported] = useState<boolean>(false);
   const [hasSavedUsername, setHasSavedUsername] = useState<boolean>(false);
+
+  // Sync timezone state with userData
+  useEffect(() => {
+    if (userData?.timezone) {
+      setTimezone(userData.timezone);
+    }
+  }, [userData]);
 
   // Fetch latest user data from DB
   const fetchUserData = async () => {
     if (!user) return;
-    const userRow = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, user.id))
-      .get();
+    const userRow = await db.select().from(users).where(eq(users.id, user.id)).get();
     if (userRow) {
       // Exclude password from userData
       const { password, ...rest } = userRow;
@@ -134,29 +120,15 @@ const SettingsScreen = () => {
     }
     setLoading(true);
     try {
-      const hashOld = await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        oldPassword
-      );
-      const userRow = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, user.id))
-        .get();
+      const hashOld = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, oldPassword);
+      const userRow = await db.select().from(users).where(eq(users.id, user.id)).get();
       if (!userRow || userRow.password !== hashOld) {
         Alert.alert("Error", "Old password is incorrect.");
         setLoading(false);
         return;
       }
-      const hashNew = await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        newPassword
-      );
-      await db
-        .update(users)
-        .set({ password: hashNew })
-        .where(eq(users.id, user.id))
-        .run();
+      const hashNew = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, newPassword);
+      await db.update(users).set({ password: hashNew }).where(eq(users.id, user.id)).run();
       Alert.alert("Success", "Password changed successfully!");
       setShowChangePassword(false);
       setOldPassword("");
@@ -170,13 +142,7 @@ const SettingsScreen = () => {
     }
   }
 
-  async function handleChangeUsername({
-    user,
-    newUsername,
-    setShowChangeUsername,
-    setNewUsername,
-    setLoading,
-  }: any) {
+  async function handleChangeUsername({ user, newUsername, setShowChangeUsername, setNewUsername, setLoading }: any) {
     if (!user) return;
     const trimmedUsername = newUsername.trim();
     if (!trimmedUsername) {
@@ -194,21 +160,13 @@ const SettingsScreen = () => {
     setLoading(true);
     try {
       // Check if username exists
-      const existing = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, trimmedUsername))
-        .get();
+      const existing = await db.select().from(users).where(eq(users.username, trimmedUsername)).get();
       if (existing && existing.id !== user.id) {
         Alert.alert("Error", "Username already exists.");
         setLoading(false);
         return;
       }
-      await db
-        .update(users)
-        .set({ username: trimmedUsername })
-        .where(eq(users.id, user.id))
-        .run();
+      await db.update(users).set({ username: trimmedUsername }).where(eq(users.id, user.id)).run();
       await updateSavedUsername(trimmedUsername);
       Alert.alert("Success", "Username changed successfully!");
       setShowChangeUsername(false);
@@ -235,11 +193,7 @@ const SettingsScreen = () => {
     }
     setLoading(true);
     try {
-      await db
-        .update(users)
-        .set({ profileImage: newProfilePic })
-        .where(eq(users.id, user.id))
-        .run();
+      await db.update(users).set({ profileImage: newProfilePic }).where(eq(users.id, user.id)).run();
       Alert.alert("Success", "Profile picture updated!");
       setShowChangeProfilePic(false);
       setNewProfilePic(null);
@@ -255,11 +209,7 @@ const SettingsScreen = () => {
     if (!user) return;
     setLoading(true);
     try {
-      await db
-        .update(users)
-        .set({ timezone: timezone })
-        .where(eq(users.id, user.id))
-        .run();
+      await db.update(users).set({ timezone: timezone }).where(eq(users.id, user.id)).run();
       Alert.alert("Success", "Timezone updated!");
       setShowChangeTimezone(false);
       fetchUserData();
@@ -297,20 +247,13 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 32 }}
-      >
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Account Section */}
-        <Text className="text-primary text-2xl font-bold px-6 pt-6 pb-2">
-          Account
-        </Text>
+        <Text className="text-primary text-2xl font-bold px-6 pt-6 pb-2">Account</Text>
         <View className="flex-row items-center gap-4 bg-background px-6 py-4 rounded-2xl shadow-sm mb-4">
           <UserAvatar uri={userData?.profileImage || ""} size={64} />
           <View className="flex-col justify-center flex-1">
-            <Text className="text-primary text-lg font-bold line-clamp-1 mb-1">
-              {userData?.username}
-            </Text>
+            <Text className="text-primary text-lg font-bold line-clamp-1 mb-1">{userData?.username}</Text>
             <Text className="text-accent text-sm font-normal leading-normal line-clamp-2">
               Created At:{" "}
               {new Date(userData?.createdAt || "").toLocaleDateString("en-GB", {
@@ -323,16 +266,14 @@ const SettingsScreen = () => {
         </View>
 
         {/* Profile Actions Section */}
-        <View className="bg-white/80 rounded-2xl shadow-md mx-4 mb-6 divide-y divide-accent/20">
+        <View className="bg-background rounded-2xl shadow-md mx-4 mb-6 divide-y divide-accent/20">
           {/* Change Username */}
           <TouchableOpacity onPress={() => setShowChangeUsername((v) => !v)}>
             <View className="flex-row items-center gap-4 px-4 py-4">
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <UserCircle size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal flex-1 truncate">
-                Change Username
-              </Text>
+              <Text className="text-primary text-base font-normal flex-1 truncate">Change Username</Text>
             </View>
           </TouchableOpacity>
           {showChangeUsername && (
@@ -371,9 +312,7 @@ const SettingsScreen = () => {
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <ImageIcon size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal flex-1 truncate">
-                Change Profile Picture
-              </Text>
+              <Text className="text-primary text-base font-normal flex-1 truncate">Change Profile Picture</Text>
             </View>
           </TouchableOpacity>
           {showChangeProfilePic && (
@@ -394,9 +333,7 @@ const SettingsScreen = () => {
                 onPress={pickImage}
                 disabled={loading}
               >
-                <Text className="text-primary text-center font-bold text-base">
-                  Pick Image
-                </Text>
+                <Text className="text-primary text-center font-bold text-base">Pick Image</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="bg-orange-light py-3 rounded-full w-full mb-2 shadow-md"
@@ -424,9 +361,7 @@ const SettingsScreen = () => {
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Key size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal flex-1 truncate">
-                Change Password
-              </Text>
+              <Text className="text-primary text-base font-normal flex-1 truncate">Change Password</Text>
             </View>
           </TouchableOpacity>
           {showChangePassword && (
@@ -485,9 +420,7 @@ const SettingsScreen = () => {
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Globe size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal flex-1 truncate">
-                Change Timezone
-              </Text>
+              <Text className="text-primary text-base font-normal flex-1 truncate">Change Timezone</Text>
             </View>
           </TouchableOpacity>
           {showChangeTimezone && (
@@ -518,19 +451,12 @@ const SettingsScreen = () => {
         </View>
 
         {/* Fingerprint Section */}
-        <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">
-          Security
-        </Text>
-        <View className="bg-white/80 rounded-2xl shadow-md mx-4 mb-6 divide-y divide-accent/20">
+        <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">Security</Text>
+        <View className="bg-background rounded-2xl shadow-md mx-4 mb-6 divide-y divide-accent/20">
           {fingerprintSupported && hasSavedUsername ? (
             <View className="flex-row items-center gap-4 px-4 py-4">
-              <Text className="text-primary text-base font-normal flex-1 truncate">
-                Enable Fingerprint Login
-              </Text>
-              <TouchableOpacity
-                onPress={() => handleToggleFingerprint(!fingerprintEnabled)}
-                style={{ padding: 8 }}
-              >
+              <Text className="text-primary text-base font-normal flex-1 truncate">Enable Fingerprint Login</Text>
+              <TouchableOpacity onPress={() => handleToggleFingerprint(!fingerprintEnabled)} style={{ padding: 8 }}>
                 <Text
                   style={{
                     color: fingerprintEnabled ? "#4caf50" : "#aaa",
@@ -553,10 +479,8 @@ const SettingsScreen = () => {
         </View>
 
         {/* Danger Section */}
-        <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">
-          Danger Zone
-        </Text>
-        <View className="bg-white/80 rounded-2xl shadow-md mx-4 mb-10">
+        <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">Danger Zone</Text>
+        <View className="bg-background rounded-2xl shadow-md mx-4 mb-10">
           <TouchableOpacity
             onPress={() => {
               if (!user) return;
@@ -568,8 +492,7 @@ const SettingsScreen = () => {
                   {
                     text: "Delete",
                     style: "destructive",
-                    onPress: () =>
-                      handleDeleteAccount({ user, setLoading, router }),
+                    onPress: () => handleDeleteAccount({ user, setLoading, router }),
                   },
                 ]
               );
@@ -579,9 +502,7 @@ const SettingsScreen = () => {
               <View className="text-primary flex items-center justify-center rounded-lg bg-surface shrink-0 size-10">
                 <Trash size={24} color="#1b130d" />
               </View>
-              <Text className="text-primary text-base font-normal flex-1 truncate">
-                Delete Account
-              </Text>
+              <Text className="text-primary text-base font-normal flex-1 truncate">Delete Account</Text>
             </View>
           </TouchableOpacity>
         </View>
