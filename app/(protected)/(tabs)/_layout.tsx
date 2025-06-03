@@ -1,5 +1,11 @@
 import { Tabs } from "expo-router";
-import { House, Money, Person, User as UserIcon } from "phosphor-react-native";
+import {
+  House,
+  Money,
+  Person,
+  OpenAiLogo,
+  User as UserIcon,
+} from "phosphor-react-native";
 import React from "react";
 import { View } from "react-native";
 
@@ -71,6 +77,16 @@ export default function TabLayout() {
           title: "Steps",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon icon={Person} color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chatbot"
+        options={{
+          headerShown: true,
+          title: "Chat",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon icon={OpenAiLogo} color={color} focused={focused} />
           ),
         }}
       />

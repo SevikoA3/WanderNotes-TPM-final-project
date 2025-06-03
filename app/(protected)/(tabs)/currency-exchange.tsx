@@ -56,7 +56,6 @@ export default function CurrencyExchangeScreen() {
   const [amount, setAmount] = useState("");
   const [result, setResult] = useState<number | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [from, setFrom] = useState("IDR");
   const [to, setTo] = useState("USD");
   const [rates, setRates] = useState<any>({});
