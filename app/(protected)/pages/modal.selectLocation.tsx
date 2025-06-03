@@ -61,7 +61,7 @@ export default function SelectLocationModal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["bottom"]}>
+    <SafeAreaView className="flex-1 bg-background-light" edges={["bottom", "top"]}>
       <View className="flex-1">
         {Platform.OS === "android" ? (
           permissionGranted ? (
@@ -95,8 +95,7 @@ export default function SelectLocationModal() {
         )}
         <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-light">
           <Text className="text-primary text-base mb-2 text-center">
-            Lat: {selectedMarkerLocation.latitude.toFixed(6)}, Lng:{" "}
-            {selectedMarkerLocation.longitude.toFixed(6)}
+            Lat: {selectedMarkerLocation.latitude.toFixed(6)}, Lng: {selectedMarkerLocation.longitude.toFixed(6)}
           </Text>
           <TouchableOpacity
             className="w-full h-14 rounded-2xl bg-orange-dark items-center justify-center"
