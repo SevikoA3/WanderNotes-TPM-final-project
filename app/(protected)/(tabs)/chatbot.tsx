@@ -62,8 +62,12 @@ const ChatTab = () => {
     const context = getNotesContext();
     const messages = [
       {
+        role: "system",
+        text: `You are a helpful assistant that answers questions based on the user's notes. The app name is WanderNotes.`,
+      },
+      {
         role: "user",
-        text: `Context: ${context}`,
+        text: `User Context Notes: ${context}`,
       },
       {
         role: "user",
