@@ -46,7 +46,7 @@ const ChatTab = () => {
     return noteList
       .map(
         (n) =>
-          `id: ${n.id}, title: ${n.title}, desc: ${n.description}, address: ${
+          `title: ${n.title}, desc: ${n.description}, address: ${
             n.address ?? "-"
           }, steps: ${n.stepCount ?? 0}`
       )
