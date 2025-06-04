@@ -1,8 +1,9 @@
 import * as Location from "expo-location";
 import { GoogleMaps } from "expo-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { MagnifyingGlass } from "phosphor-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { Platform, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { locationEventEmitter } from "../../services/locationEvents";
 
@@ -31,6 +32,9 @@ export default function SelectLocationModal() {
   };
 
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
@@ -60,9 +64,64 @@ export default function SelectLocationModal() {
     router.dismiss();
   };
 
+  const handleSearch = async () => {
+    if (!searchText.trim()) return;
+    setSearchLoading(true);
+    setSearchError("");
+    try {
+      // Ensure permission is granted before geocoding
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setSearchError("Location permission not granted");
+        setSearchLoading(false);
+        return;
+      }
+      const results = await Location.geocodeAsync(searchText);
+      if (results.length > 0) {
+        const loc = results[0];
+        setSelectedMarkerLocation({ latitude: loc.latitude, longitude: loc.longitude });
+        mapRef.current?.setCameraPosition({
+          coordinates: { latitude: loc.latitude, longitude: loc.longitude },
+          zoom: 15,
+          duration: 500,
+        });
+      } else {
+        setSearchError("Location not found");
+      }
+    } catch (e) {
+      setSearchError("Failed to search location");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background-light" edges={["bottom", "top"]}>
       <View className="flex-1">
+        {/* Search Bar */}
+        <View className="absolute top-0 left-0 right-0 z-10 p-4">
+          <View className="flex-row items-center bg-surface rounded-2xl shadow px-3 py-2">
+            <TextInput
+              className="flex-1 text-base text-accent-light font-normal bg-transparent border-none p-0"
+              placeholder="Search location..."
+              placeholderTextColor="#a97c5a"
+              value={searchText}
+              onChangeText={setSearchText}
+              onSubmitEditing={handleSearch}
+              editable={!searchLoading}
+              returnKeyType="search"
+            />
+            <TouchableOpacity
+              onPress={handleSearch}
+              disabled={searchLoading}
+              className="ml-2 w-10 h-10 rounded-full bg-orange-dark items-center justify-center shadow-md"
+              activeOpacity={0.85}
+            >
+              <MagnifyingGlass size={22} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {!!searchError && <Text className="text-accent text-base font-normal mt-1 text-center">{searchError}</Text>}
+        </View>
         {Platform.OS === "android" ? (
           permissionGranted ? (
             <GoogleMaps.View
