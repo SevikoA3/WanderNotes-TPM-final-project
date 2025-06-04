@@ -1,5 +1,6 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import axios from "axios";
+import { PaperPlaneRight } from "phosphor-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -105,7 +106,7 @@ const ChatTab = () => {
             <View className="flex-1 justify-end">
               {chat ? (
                 <View className="mb-8">
-                  <View className="mb-4 self-end max-w-[80%] bg-orange rounded-2xl px-4 py-3 shadow-md">
+                  <View className="mb-4 self-end max-w-[80%] bg-orange-light rounded-2xl px-4 py-3 shadow-md">
                     <Text className="text-white text-base font-medium">
                       {chat.user}
                     </Text>
@@ -150,7 +151,7 @@ const ChatTab = () => {
               disabled={loading || !input.trim()}
               activeOpacity={0.85}
             >
-              <Text className="text-white text-base font-bold">Send</Text>
+              <PaperPlaneRight color="#fdf9f6" />
             </TouchableOpacity>
           </View>
         </View>

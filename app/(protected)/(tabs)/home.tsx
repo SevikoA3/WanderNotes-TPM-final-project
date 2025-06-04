@@ -1,5 +1,4 @@
-import { useFocusEffect } from "expo-router";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { MagnifyingGlass, Plus } from "phosphor-react-native";
 import React, { useCallback, useState } from "react";
 import {
@@ -65,7 +64,11 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <ScrollView className="flex-1" stickyHeaderIndices={[0]}>
+      <ScrollView
+        className="flex-1 grow"
+        stickyHeaderIndices={[0]}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         {/* Header */}
         <View className="bg-background">
           <View className="flex-row items-center p-4 pb-2 justify-between">
@@ -92,16 +95,23 @@ const HomeScreen = () => {
             </View>
           </View>
         </View>
-        <View className="flex-1 justify-between">
-          {/* Top Section */}
-          <View>
-            {/* Content Cards */}
-            {loading ? (
-              <View className="flex-1 items-center justify-center py-12">
-                <ActivityIndicator size="large" color="#FF6347" />
-              </View>
-            ) : (
-              filteredNotes.map((note, index) => (
+        {/* Content Section */}
+        {loading ? (
+          <View className="flex-1 items-center justify-center py-12">
+            <ActivityIndicator size="large" color="#1b130d" />
+          </View>
+        ) : filteredNotes.length === 0 ? (
+          <View className="flex-1 items-center justify-center w-full">
+            <Text className="text-lg text-accent text-center">
+              No notes yet.{"\n"}Tap the + button to add your first note.
+            </Text>
+          </View>
+        ) : (
+          <View className="flex-1 justify-between">
+            {/* Top Section */}
+            <View>
+              {/* Content Cards */}
+              {filteredNotes.map((note, index) => (
                 <NoteCard
                   key={note.id || index}
                   note={note}
@@ -112,10 +122,10 @@ const HomeScreen = () => {
                     })
                   }
                 />
-              ))
-            )}
+              ))}
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
       {/* Floating Plus Button */}
       <TouchableOpacity
@@ -123,7 +133,7 @@ const HomeScreen = () => {
         className="absolute bottom-8 right-6 bg-orange rounded-full w-16 h-16 items-center justify-center shadow-lg"
         activeOpacity={0.85}
       >
-        <Plus size={32} color="#FFFFFF" />
+        <Plus size={32} color="#fdf9f6" />
       </TouchableOpacity>
     </SafeAreaView>
   );
