@@ -3,7 +3,13 @@ import { GoogleMaps } from "expo-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MagnifyingGlass } from "phosphor-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { locationEventEmitter } from "../../services/locationEvents";
 
@@ -79,10 +85,13 @@ export default function SelectLocationModal() {
       const results = await Location.geocodeAsync(searchText);
       if (results.length > 0) {
         const loc = results[0];
-        setSelectedMarkerLocation({ latitude: loc.latitude, longitude: loc.longitude });
+        setSelectedMarkerLocation({
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+        });
         mapRef.current?.setCameraPosition({
           coordinates: { latitude: loc.latitude, longitude: loc.longitude },
-          zoom: 5,
+          zoom: 10,
           duration: 1000,
         });
       } else {
@@ -96,7 +105,10 @@ export default function SelectLocationModal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light" edges={["bottom", "top"]}>
+    <SafeAreaView
+      className="flex-1 bg-background-light"
+      edges={["bottom", "top"]}
+    >
       <View className="flex-1">
         {/* Search Bar */}
         <View className="absolute top-0 left-0 right-0 z-10 p-4">
@@ -120,7 +132,11 @@ export default function SelectLocationModal() {
               <MagnifyingGlass size={22} color="#fff" />
             </TouchableOpacity>
           </View>
-          {!!searchError && <Text className="text-accent text-base font-normal mt-1 text-center">{searchError}</Text>}
+          {!!searchError && (
+            <Text className="text-accent text-base font-normal mt-1 text-center">
+              {searchError}
+            </Text>
+          )}
         </View>
         {Platform.OS === "android" ? (
           permissionGranted ? (
@@ -154,7 +170,8 @@ export default function SelectLocationModal() {
         )}
         <View className="absolute bottom-0 left-0 right-0 p-4 bg-background-light">
           <Text className="text-primary text-base mb-2 text-center">
-            Lat: {selectedMarkerLocation.latitude.toFixed(6)}, Lng: {selectedMarkerLocation.longitude.toFixed(6)}
+            Lat: {selectedMarkerLocation.latitude.toFixed(6)}, Lng:{" "}
+            {selectedMarkerLocation.longitude.toFixed(6)}
           </Text>
           <TouchableOpacity
             className="w-full h-14 rounded-2xl bg-orange-dark items-center justify-center"

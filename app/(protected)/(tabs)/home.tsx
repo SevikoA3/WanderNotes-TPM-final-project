@@ -52,7 +52,7 @@ const HomeScreen = () => {
       return () => {
         isActive = false;
       };
-    }, [user]) // <--- Tambah user ke dependency
+    }, [user])
   );
 
   // Filter notes by search

@@ -11,17 +11,12 @@ import { useAuth } from "../../utils/authContext";
 
 const StepCounterScreen = () => {
   // {State Management}
-  const [isPedometerAvailable, setIsPedometerAvailable] =
-    useState<string>("checking");
-  const [pastStepCount, setPastStepCount] = useState<number>(0);
   const [currentStepCount, setCurrentStepCount] = useState<number>(0);
   const [isCounting, setIsCounting] = useState<boolean>(false);
   const [stepStart, setStepStart] = useState<number | null>(null);
   const [stepCounted, setStepCounted] = useState<number>(0);
   const [permissionStatus, setPermissionStatus] = useState<string>("checking");
   const [noteList, setNoteList] = useState<any[]>([]);
-  const [selectedNote, setSelectedNote] = useState<any>(null);
-  const [modalVisible, setModalVisible] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState<string>("");
   let subscriptionRef = React.useRef<any>(null);
   const { user } = useAuth();
@@ -165,19 +160,6 @@ const StepCounterScreen = () => {
     }, [user])
   );
 
-  // {Save Steps to Note Handler}
-  const handleSaveStepToNote = async () => {
-    if (!selectedNote) return;
-    await db
-      .update(notes)
-      .set({ stepCount: stepCounted })
-      .where(eq(notes.id, selectedNote.id));
-    setModalVisible(false);
-    setSelectedNote(null);
-    setStepCounted(0);
-    alert("Steps successfully saved to note!");
-  };
-
   // Helper: Find note by selectedNoteId
   const getSelectedNote = () => {
     return noteList.find((n) => n.id.toString() === selectedNoteId);
@@ -224,22 +206,14 @@ const StepCounterScreen = () => {
       const perm = await Pedometer.getPermissionsAsync();
       setPermissionStatus(perm.status);
       if (!perm.granted) {
-        setIsPedometerAvailable("Permission denied");
         return;
       }
       const isAvailable = await Pedometer.isAvailableAsync();
-      setIsPedometerAvailable(isAvailable ? "Yes" : "No");
       if (isAvailable) {
         const end = new Date();
         const start = new Date();
         start.setDate(end.getDate() - 1);
-        const pastStepCountResult = await Pedometer.getStepCountAsync(
-          start,
-          end
-        );
-        if (pastStepCountResult) {
-          setPastStepCount(pastStepCountResult.steps);
-        }
+        await Pedometer.getStepCountAsync(start, end);
         subscription = Pedometer.watchStepCount((result) => {
           setCurrentStepCount(result.steps);
         });
