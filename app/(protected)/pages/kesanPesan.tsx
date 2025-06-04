@@ -11,7 +11,7 @@ const KesanPesanScreen = () => {
             Aplikasi ini mungkin masih terhitung simple karena temanya aja
             intinya cuma note. tapi dari hal yang simple gini banyak banget yang
             bisa aku pelajari kaya misalnya fitur reminder, sensor-sensor yang
-            bisa dipakai, image handling, dan lain-lain. Terima kasih ke pada
+            bisa dipakai, image handling, dan lain-lain. Terima kasih kepada
             pak bagus untuk satu semesternya ini, semoga ilmu yang bapak berikan
             bisa menjadi amal jariyah.
           </Text>
