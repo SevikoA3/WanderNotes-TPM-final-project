@@ -7,7 +7,7 @@ const SevikoProfile = () => {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 0 }}>
         {/* Header Section */}
-        <View className="bg-gradient-to-b from-orange-light to-background items-center pb-8 pt-12 px-6 rounded-b-3xl shadow-lg mb-6">
+        <View className="bg-surface items-center pb-8 pt-12 px-6 rounded-b-3xl shadow-lg mb-6 mx-6">
           <View className="border-4 border-orange-light rounded-full shadow-lg mb-4">
             <Image
               source={require("../../../assets/images/myPic.jpg")}
