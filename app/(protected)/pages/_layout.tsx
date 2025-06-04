@@ -100,6 +100,22 @@ export default function componentsLayout() {
             },
           }}
         />
+
+        <Stack.Screen
+          name="seviko-profile"
+          options={{
+            title: "Seviko's Profile",
+            headerShown: true,
+            headerStyle: {
+              backgroundColor: "#fcfaf8",
+            },
+            headerTitleStyle: {
+              color: "#1b130d",
+              fontSize: 24,
+              fontWeight: "bold",
+            },
+          }}
+        />
       </Stack>
     </>
   );
