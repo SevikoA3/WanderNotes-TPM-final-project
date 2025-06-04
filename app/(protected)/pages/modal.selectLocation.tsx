@@ -82,8 +82,8 @@ export default function SelectLocationModal() {
         setSelectedMarkerLocation({ latitude: loc.latitude, longitude: loc.longitude });
         mapRef.current?.setCameraPosition({
           coordinates: { latitude: loc.latitude, longitude: loc.longitude },
-          zoom: 15,
-          duration: 500,
+          zoom: 5,
+          duration: 1000,
         });
       } else {
         setSearchError("Location not found");
