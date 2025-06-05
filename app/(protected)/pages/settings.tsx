@@ -530,7 +530,7 @@ const SettingsScreen = () => {
         <Text className="text-primary text-xl font-bold px-6 pt-2 pb-1">
           Security
         </Text>
-        <View className="bg-background rounded-2xl shadow-md mx-4 mb-6 divide-y divide-accent/20">
+        <View className="bg-background rounded-2xl shadow-md mx-4 mb-6">
           {fingerprintSupported && hasSavedUsername ? (
             <View className="flex-row items-center gap-4 px-4 py-4">
               <Text className="text-primary text-base font-normal flex-1 truncate">
